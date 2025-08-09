@@ -1,0 +1,62 @@
+
+
+.ant-menu-light{
+  background-color: #5f90ea;
+  color: #fff;
+}
+a{
+  color: inherit;
+}
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: revert-layer !important;
+  font-weight: 500;
+}
+body{
+  background: #f8f9fc;
+}
+
+.ant-menu{
+  line-height: 60px !important;
+}
+
+.ant-menu-item-selected{
+  color: #fff !important;
+}
+.ant-menu-item-selected::after{
+  border-bottom-width: 4px !important;
+    border-bottom-color: #fff !important;
+}
+.ant-menu-item:hover:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected){
+  color: #fff !important;
+
+}
+.ant-menu-item:hover::after{
+  border-bottom-width: 4px !important;
+  border-bottom-color: #fff !important;
+}
+
+
+.ant-btn .anticon{
+  vertical-align:middle;
+}
+.ant-pagination{
+  display: flex;        /* 启用 Flexbox */
+  justify-content: center; /* 让子元素靠右对齐 */
+
+}
+
+.ant-layout {
+  font-size: 16px !important;
+}
+.ant-menu{
+  font-size: 16px !important;
+}
+
+.ant-menu-item{
+  margin-right: 50px !important;
+}
+
+ .ant-layout-header{
+  padding-inline: 160px !important;
+ }
