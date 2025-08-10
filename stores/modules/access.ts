@@ -1,7 +1,7 @@
 
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
-type AccessToken = string;
+type AccessToken = null | string;
 
 interface AccessState {
 
@@ -15,7 +15,10 @@ interface AccessState {
      * 登录是否过期
      */
     loginExpired: boolean;
-
+    /**
+     * 登录 accessToken
+     */
+    refreshToken: AccessToken;
 }
 
 /**
@@ -28,22 +31,27 @@ export const useAccessStore = defineStore('core-access', {
         setAccessToken(token: AccessToken) {
             this.accessToken = token;
         },
-        getAccessToken() {
-            return this.accessToken;
-        },
 
         setLoginExpired(loginExpired: boolean) {
             this.loginExpired = loginExpired;
         },
-
+        setRefreshToken(token: AccessToken) {
+            this.refreshToken = token;
+        },
     },
     persist: {
         // 持久化
-        pick: ['accessToken'],
+        pick: ['accessToken', 'refreshToken'],
     },
     state: (): AccessState => ({
-        accessToken: '',
+        accessToken: null,
         loginExpired: false,
-
+        refreshToken: null,
     }),
 });
+
+// 解决热更新问题
+const hot = import.meta.hot;
+if (hot) {
+    hot.accept(acceptHMRUpdate(useAccessStore, hot));
+}

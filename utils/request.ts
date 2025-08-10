@@ -1,6 +1,6 @@
 // utils/request.ts
 
-import { useAccessStore } from '~/stores/access'
+import { useAccessStore } from '~/stores'
 import { message } from 'ant-design-vue'
 
 export interface RequestOptions {
