@@ -2,7 +2,7 @@ import type { RequestClient } from './request-client';
 import type { MakeErrorMessageFn, ResponseInterceptorConfig } from './types';
 
 
-import { isFunction } from '@/utils';
+import { isFunction } from '~/utils';
 
 import axios from 'axios';
 

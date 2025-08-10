@@ -2,7 +2,7 @@
 import { ref, watch, computed } from "vue";
 import type { MenuProps } from "ant-design-vue";
 import { useUserApi } from "~/api"
-import { useAccessStore } from "~/stores"
+import { useAccessStore,useUserStore } from "~/stores"
 const userApi = useUserApi()
 const current = ref<string[]>(["mail"]);
 const items = ref<MenuProps["items"]>([
@@ -35,16 +35,7 @@ const links = [
 // 不要在应用启动时自动登录或请求用户信息
 // 当检测到已存在的 token 时再请求用户信息
 const accessStore = useAccessStore()
-const accessToken = computed(() => accessStore.accessToken)
-watch(
-  () => accessToken.value,
-  (newToken) => {
-    if (newToken) {
-      userApi.getUserInfo()
-    }
-  },
-  { immediate: true }
-)
+const userStore = useUserStore()
 
 const searchValue = ref("");
 
@@ -77,32 +68,32 @@ const themeConfig = {
     colorPrimary: "#5f90ea",
   },
 };
-// const onLogin = () => {
-//   accessStore.setLoginExpired(true);
-// };
-// const accessStore = useAccessStore();
-// const accessToken = computed(() => {
-//   return accessStore.accessToken;
-// });
-// const loginExpired = computed(() => {
-//   return accessStore.loginExpired;
-// });
-// watch(
-//   () => accessToken.value,
-//   (newToken) => {
-//     if (newToken) {
-//       userStore.getUserInfo();
-//     }
-//   },
-//   {
-//     immediate: true,
-//   }
-// );
+const onLogin = () => {
+  accessStore.setLoginExpired(true);
+};
 
-// const authStore = useAuthStore();
-// function onLogout() {
-//   authStore.logout();
-// }
+const accessToken = computed(() => {
+  return accessStore.accessToken;
+});
+const loginExpired = computed(() => {
+  return accessStore.loginExpired;
+});
+watch(
+  () => accessToken.value,
+  (newToken) => {
+    if (newToken) {
+      userStore.getUserInfo();
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+
+const authStore = useAuthStore();
+function onLogout() {
+  authStore.logout();
+}
 
 function handleEnterPressed(){
   console.log(122);
@@ -165,7 +156,7 @@ const showArticle = ref(false);
               会员中心
             </a-button>
           </div>
-          <!-- <div class="mr-2 vip-btn" v-if="!accessToken">
+          <div class="mr-2 vip-btn" v-if="!accessToken">
             <a-button ghost @click="onLogin"> 登录/注册 </a-button>
           </div>
           <a-avatar :src="userStore.userInfo?.avatar" />
@@ -187,7 +178,7 @@ const showArticle = ref(false);
                 </a-menu-item>
               </a-menu>
             </template>
-          </a-dropdown> -->
+          </a-dropdown>
         </div>
       </a-layout-header>
       <a-layout-content class="flex-1">

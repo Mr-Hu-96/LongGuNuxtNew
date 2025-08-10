@@ -1,33 +1,31 @@
 <script setup lang="ts">
 import { ref, createVNode } from "vue";
-import {
-  getFavoritesApi,
-  deleteFavoritesApi,
-  updateFavoriteApi,
-} from "@/api/core/stock";
+import { useStockApi } from "~/api";
 import { useRouter } from "vue-router";
 import { DeleteOutlined } from "@ant-design/icons-vue";
 import type { StockModelList } from "~/api";
 import { message, Modal } from "ant-design-vue";
 
+const { getFavorites: getFavoritesApi, deleteFavorites: deleteFavoritesApi, updateFavorite: updateFavoriteApi } = useStockApi();
+
 const columns = [
-  { title: "代码", dataIndex: "code", align: "center" },
-  { title: "股票名称", dataIndex: "name", align: "center" },
-  { title: "涨幅", dataIndex: "increase", align: "center" },
-  { title: "换手", dataIndex: "prev_close", align: "center" },
-  { title: "成交", dataIndex: "open_price", align: "center" },
-  { title: "总市值", dataIndex: "total_value", align: "center" },
-  { title: "流通市值", dataIndex: "circulation_value", align: "center" },
-  { title: "最近炒作", dataIndex: "low_price", align: "center" },
+  { title: "代码", dataIndex: "code", align: "center" as const },
+  { title: "股票名称", dataIndex: "name", align: "center" as const },
+  { title: "涨幅", dataIndex: "increase", align: "center" as const },
+  { title: "换手", dataIndex: "prev_close", align: "center" as const },
+  { title: "成交", dataIndex: "open_price", align: "center" as const },
+  { title: "总市值", dataIndex: "total_value", align: "center" as const },
+  { title: "流通市值", dataIndex: "circulation_value", align: "center" as const },
+  { title: "最近炒作", dataIndex: "low_price", align: "center" as const },
   {
     title: "操作",
     dataIndex: "operate",
-    align: "center",
+    align: "center" as const,
   },
   {
     title: "备注",
     dataIndex: "mark",
-    align: "center",
+    align: "center" as const,
   },
 ];
 
@@ -35,19 +33,22 @@ const router = useRouter();
 const dataList = ref<StockModelList[]>([]);
 function getData() {
   getFavoritesApi().then((res) => {
-    dataList.value = res.list.map(item=>{
-      item.prev_close = item.prev_close+'%'
-      item.open_price = item.open_price+'亿'
-      item.total_value = item.total_value+'亿'
-      item.circulation_value = item.circulation_value+'亿'
-      return item
-
-    });
+    if (res && res.list) {
+      dataList.value = res.list.map(item => {
+        return {
+          ...item,
+          prev_close: item.increase + '%',
+          open_price: item.circulation_value + '亿',
+          total_value: item.total_value + '亿',
+          circulation_value: item.circulation_value + '亿'
+        };
+      });
+    }
   });
 }
 getData();
 
-function deleteStock(code: string,index:number) {
+function deleteStock(code: string, index: number) {
   Modal.confirm({
     title: "确认删除",
     content: createVNode(
@@ -58,7 +59,7 @@ function deleteStock(code: string,index:number) {
     onOk() {
       deleteFavoritesApi({ code }).then((res) => {
         message.success("删除成功");
-        dataList.value.splice(index,1)
+        dataList.value.splice(index, 1);
       });
     },
     onCancel() {
@@ -87,7 +88,7 @@ function updateRemark(code: number, mark: string) {
       <template #bodyCell="{ column, text, record,index }">
         <template v-if="column.dataIndex === 'name'">
           <span
-            class="cursor-pointer text-blue-600"
+            class="text-blue-600 cursor-pointer"
             @click="router.push('/stock/detail?code=' + record.code)"
             >{{ text }}</span
           >

@@ -18,7 +18,8 @@ const data: {
 });
 
 function getNoticeList() {
-  getNoticeListApi({
+  const { getNoticeList } = useUserApi();
+  getNoticeList({
     page: data.current_page,
     page_size: data.page_size,
   }).then((res) => {
@@ -38,7 +39,7 @@ function onChange() {
     <a-breadcrumb-item href @click="router.push('/')">首页</a-breadcrumb-item>
     <a-breadcrumb-item>消息中心</a-breadcrumb-item>
   </a-breadcrumb>
-  <div class="bg-white p-4 mt-4">
+  <div class="p-4 mt-4 bg-white">
     <div
       v-for="n in data.list"
       :key="n.id"
@@ -64,7 +65,7 @@ function onChange() {
           width: 100%;
         "
       >
-        <div class="flex justify-between items-center pb-2">
+        <div class="flex items-center justify-between pb-2">
           <div style="font-size: 150%; font-weight: bold">{{ n.name }}</div>
           <div
             style="

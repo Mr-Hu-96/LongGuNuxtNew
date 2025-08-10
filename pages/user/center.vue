@@ -7,13 +7,13 @@
       <a-avatar :size="100" :src="userInfo?.avatar" />
 
       <!-- 右侧内容 -->
-      <div class="ml-4 flex flex-col flex-1">
+      <div class="flex flex-col flex-1 ml-4">
         <!-- 用户名和标签 -->
         <div class="flex items-center mt-2">
           <span class="text-lg font-semibold">{{ userInfo?.nickname }}</span>
           <img v-if="userInfo?.vip_info?.vip_type" style="width: 100px;" :src="'/images/user/vip'+userInfo?.vip_info?.vip_type+'.png'" alt="vip" class="px-2 py-1" />
 
-          <span class="text-gray-500 text-sm"
+          <span class="text-sm text-gray-500"
             >到期时间：{{
               formatTimestamp(userInfo?.vip_info?.expiretime)
             }}</span
@@ -24,25 +24,25 @@
         </div>
 
         <!-- ID 和其他信息 -->
-        <div class="flex items-center text-gray-600 text-sm my-3">
+        <div class="flex items-center my-3 text-sm text-gray-600">
           <span>ID: {{ userInfo?.id }}</span>
-          <span class="ml-4 flex items-center"> 📌 {{ userInfo?.email }} </span>
-          <span class="ml-4 flex items-center">
+          <span class="flex items-center ml-4"> 📌 {{ userInfo?.email }} </span>
+          <span class="flex items-center ml-4">
             📞 {{ userInfo?.mobile }}
           </span>
         </div>
 
         <!-- 简介 -->
-        <p class="text-gray-500 text-sm">{{ userInfo?.brief }}</p>
+        <p class="text-sm text-gray-500">{{ userInfo?.brief }}</p>
       </div>
     </div>
-    <div class="bg-white px-4 rounded-sm shadow my-2">
+    <div class="px-4 my-2 bg-white rounded-sm shadow">
       <a-tabs v-model:activeKey="activeKey">
         <a-tab-pane key="1" tab="文章">
           <div class="article">
             <div
               v-if="articleData.list.length === 0"
-              class="flex items-center flex-col mt-2 py-4"
+              class="flex flex-col items-center py-4 mt-2"
             >
               <img class="pt-[48px]" src="/images/user/empty.png" alt="empty" />
               <div class="py-10">这里什么都没有，赶紧创作吧~</div>
@@ -63,11 +63,11 @@
                     alt="list"
                     class="h-[90px] w-[150px]"
                   />
-                  <div class="ml-4 flex flex-col flex-1">
+                  <div class="flex flex-col flex-1 ml-4">
                     <div class="flex items-center mt-2">
                       <div class="list-title">{{ item.title }}</div>
                       <div
-                        class="ml-auto flex items-center text-gray-600 controls"
+                        class="flex items-center ml-auto text-gray-600 controls"
                       >
                         <span
                           :style="'color:' + statusObj[item.status].color"
@@ -105,7 +105,7 @@
                       </div>
                     </div>
 
-                    <div class="mt-4 flex items-center text-gray-600">
+                    <div class="flex items-center mt-4 text-gray-600">
                       <img src="/images/user/time.png" alt="时间" />
                       <div class="pr-8">
                         {{
@@ -128,7 +128,7 @@
                 :total="articleData.total"
                 @change="onChange"
               />
-              <div class="w-full flex justify-end items-center py-4">
+              <div class="flex items-center justify-end w-full py-4">
                 <a-button type="primary" @click="onCreateArticle"
                   >开始创作</a-button
                 >
@@ -144,7 +144,7 @@
               <img
                 :src="userInfo.avatar"
                 alt="头像"
-                class="w-16 h-16 rounded-full object-cover"
+                class="object-cover w-16 h-16 rounded-full"
               />
               <a-upload
                 v-model:file-list="fileList"
@@ -158,7 +158,7 @@
             </div>
 
             <!-- 用户信息 -->
-            <div class="mt-6 gap-4 text-gray-700">
+            <div class="gap-4 mt-6 text-gray-700">
               <div class="flex">
                 <div class="font-semibold left-name">用户昵称</div>
                 <span>{{ userInfo.nickname }}</span>
@@ -190,7 +190,7 @@
             </div>
           </div>
           <!-- 修改按钮 -->
-          <div class="w-full flex justify-center my-4">
+          <div class="flex justify-center w-full my-4">
             <a-button style="width: 200px" type="primary" @click="showModal"
               >修改</a-button
             >
@@ -272,7 +272,7 @@
         <a-form-item label="文章类别" name="title">
           <a-select
             ref="select"
-            v-model:value="articleItem.category_id"
+            v-model:value="categoryIdValue"
             placeholder="请选择文章类别"
             style="width: 200px"
             :options="categoryList"
@@ -297,25 +297,21 @@ import {
 import RichTextEditor from "~/components/RichTextEditor.vue";
 import { useUserStore } from "~/stores/modules/user";
 import { useAuthStore } from "~/stores/modules/auth";
-import { useSystemApi } from "~/api";
+import { useSystemApi, useArticleApi, useUserApi } from "~/api";
 import type { UploadProps } from "ant-design-vue";
 import { message } from "ant-design-vue";
 import type { BasicUserInfo } from "~/types/user";
-import { useUserApi } from "~/api";
 import { useCloned } from "@vueuse/core";
 import { formatTimestamp } from "~/utils/date";
 import { useRouter } from "vue-router";
-import {
-  getArticleListApi,
-  saveArticleApi,
-  deleteArticleApi,
-  getArticleInfoApi,
-  getArticleCategoryListApi,
-} from "@/api/core/article";
 import type { SaveArticle } from "~/api";
 import type { Rule } from "ant-design-vue/es/form";
+
 const router = useRouter();
 const userStore = useUserStore();
+const { getArticleList: getArticleListApi, saveArticle: saveArticleApi, deleteArticle: deleteArticleApi, getArticleInfo: getArticleInfoApi, getArticleCategoryList: getArticleCategoryListApi } = useArticleApi();
+const { saveUserInfo: saveUserInfoApi } = useUserApi();
+const { uploadFile } = useSystemApi();
 const userInfo = computed(() => {
   return (userStore.userInfo as BasicUserInfo) || {};
 });
@@ -360,11 +356,13 @@ const handleOk = (_e: MouseEvent) => {
 const fileList = ref<UploadProps["fileList"]>([]);
 const avatarBeforeUpload: UploadProps["beforeUpload"] = (file) => {
   uploadFile({ file }).then((res) => {
-    user.value.avatar = res.fullurl;
-    saveUserInfoApi({ data: JSON.stringify(user.value) }).then((_res) => {
-      message.success("头像修改成功");
-      authStore.fetchUserInfo();
-    });
+    if (res) {
+      user.value.avatar = res.fullurl;
+      saveUserInfoApi({ data: JSON.stringify(user.value) }).then((_res) => {
+        message.success("头像修改成功");
+        authStore.fetchUserInfo();
+      });
+    }
   });
   // ⚠️ 阻止默认上传行为
   return false;
@@ -382,8 +380,10 @@ function getArticleList() {
     page_size: articleData.page_size,
   })
     .then((res) => {
-      articleData.list = res.list;
-      articleData.total = res.total;
+      if (res && res.list) {
+        articleData.list = res.list;
+        articleData.total = res.total;
+      }
     })
     .catch(() => {
       articleData.list = [];
@@ -396,6 +396,14 @@ const openArticle = ref<boolean>(false);
 const articleItem = ref<SaveArticle>({
   content: "",
 } as SaveArticle);
+
+const categoryIdValue = computed({
+  get: () => articleItem.value.category_id || undefined,
+  set: (value) => {
+    articleItem.value.category_id = value || null;
+  }
+});
+
 const coverFileList = ref<UploadProps["fileList"]>([]);
 const loading = ref<boolean>(false);
 const rules: Record<string, Rule[]> = {
@@ -410,7 +418,9 @@ const rules: Record<string, Rule[]> = {
 const articleFormRef = ref();
 const coverBeforeUpload: UploadProps["beforeUpload"] = (file) => {
   uploadFile({ file }).then((res) => {
-    articleItem.value.cover = res.fullurl;
+    if (res) {
+      articleItem.value.cover = res.fullurl;
+    }
   });
   // ⚠️ 阻止默认上传行为
   return false;
@@ -426,12 +436,14 @@ function onCreateArticle() {
     abstract: "",
   } as SaveArticle;
   getArticleCategoryListApi().then((res) => {
-    categoryList.value = res.map((item) => {
-      return {
-        value: item.id,
-        label: item.name,
-      };
-    });
+    if (res) {
+      categoryList.value = res.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    }
   });
   openArticle.value = true;
 }
@@ -452,25 +464,29 @@ function saveArticle() {
 }
 function onEditArticle(article_id: string) {
   getArticleInfoApi({ article_id }).then((res) => {
-    const { article_id, content, cover, abstract, title ,category_id} = res;
-    articleItem.value.abstract = abstract;
-    articleItem.value.content = content;
-    articleItem.value.cover = cover;
-    articleItem.value.article_id = article_id;
-    articleItem.value.title = title;
-    articleItem.value.category_id = category_id;
-    if (categoryList.value?.length == 0) {
-      getArticleCategoryListApi().then((res) => {
-        categoryList.value = res.map((item) => {
-          return {
-            value: item.id,
-            label: item.name,
-          };
+    if (res) {
+      const { article_id, content, cover, abstract, title ,category_id} = res;
+      articleItem.value.abstract = abstract;
+      articleItem.value.content = content;
+      articleItem.value.cover = cover;
+      articleItem.value.article_id = article_id;
+      articleItem.value.title = title;
+      articleItem.value.category_id = category_id;
+      if (categoryList.value?.length == 0) {
+        getArticleCategoryListApi().then((res) => {
+          if (res) {
+            categoryList.value = res.map((item) => {
+              return {
+                value: item.id,
+                label: item.name,
+              };
+            });
+          }
         });
-      });
-    }
+      }
 
-    openArticle.value = true;
+      openArticle.value = true;
+    }
   });
 }
 function onDeleteArticle(article_id: string) {

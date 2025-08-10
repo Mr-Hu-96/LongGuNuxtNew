@@ -15,14 +15,14 @@
           justify="space-between"
           align="center"
         >
-          <div class="flex items-center gap-x-1 px-2">
+          <div class="flex items-center px-2 gap-x-1">
             <img
               class="h-[20px]"
               src="/images/home/ladder.png"
               alt=""
               srcset=""
             />
-            <div class="text-white pr-3">连扳梯队</div>
+            <div class="pr-3 text-white">连扳梯队</div>
             <a-button class="!px-1">{{ leftData.date }}</a-button>
             <a-button
               class="!bg-[#7fa6ee] !text-white !border-transparent hover:!bg-[#5f90ea] !px-1"
@@ -41,7 +41,7 @@
             >
             </a-select>
           </div>
-          <div class="flex items-center gap-x-1 px-2 text-white">
+          <div class="flex items-center px-2 text-white gap-x-1">
             <span class="pr-2">排除</span>
             <a-checkbox-group
               v-model:value="leftCheckedList"
@@ -115,7 +115,7 @@
                       @click="router.push('/vip')"
                       class="rounded px-3 py-2 min-w-[110px] text-m shadow-sm border border-[#E8ECF5] cursor-pointer"
                     >
-                      <div class="flex items-center flex-col">
+                      <div class="flex flex-col items-center">
                         <LockOutlined color="#888888" />
                         <div class="pt-1 text-[#888888]">点击解锁</div>
                       </div>
@@ -133,14 +133,14 @@
           justify="space-between"
           align="center"
         >
-          <div class="flex items-center gap-x-1 px-2">
+          <div class="flex items-center px-2 gap-x-1">
             <img
               class="h-[20px]"
               src="/images/home/ladder.png"
               alt=""
               srcset=""
             />
-            <div class="text-white pr-3">热点题材</div>
+            <div class="pr-3 text-white">热点题材</div>
             <a-button class="!px-1">{{ rightData.date }}</a-button>
             <a-button
               class="!bg-[#7fa6ee] !text-white !border-transparent hover:!bg-[#5f90ea] !px-1"
@@ -159,7 +159,7 @@
             >
             </a-select>
           </div>
-          <div class="flex items-center gap-x-1 text-white">
+          <div class="flex items-center text-white gap-x-1">
             <span class="pr-2">排除</span>
             <a-checkbox-group
               v-model:value="rightCheckedList"
@@ -230,7 +230,7 @@
                       @click="router.push('/vip')"
                       class="rounded px-3 py-2 min-w-[110px] text-m shadow-sm border border-[#E8ECF5] cursor-pointer"
                     >
-                      <div class="flex items-center flex-col">
+                      <div class="flex flex-col items-center">
                         <LockOutlined color="#888888" />
                         <div class="pt-1 text-[#888888]">点击解锁</div>
                       </div>
@@ -288,10 +288,10 @@ import { useSystemApi, useStockApi } from "~/api";
 import { setTDK } from "~/utils";
 import { formatTimestamp } from "~/utils/date";
 import type { SelectProps } from "ant-design-vue";
-import home_notice from "/src/assets/home_notice.png";
-import home_service from "/src/assets/home_service.png";
-import home_vip from "/src/assets/home_vip.png";
-import wechat from "/src/assets/wechat.png";
+import home_notice from "/assets/home_notice.png";
+import home_service from "/assets/home_service.png";
+import home_vip from "/assets/home_vip.png";
+import wechat from "/assets/wechat.png";
 import type { BasicUserInfo } from "~/types/user";
 const plainOptions = [
   { label: "主板", value: 1 },

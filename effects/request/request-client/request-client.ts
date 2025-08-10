@@ -2,7 +2,7 @@ import type { AxiosInstance, AxiosResponse } from 'axios';
 
 import type { RequestClientConfig, RequestClientOptions } from './types';
 
-import { bindMethods, merge } from '@/utils';
+import { bindMethods, merge } from '~/utils';
 
 import axios from 'axios';
 

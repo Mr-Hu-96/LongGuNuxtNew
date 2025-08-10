@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { useArticleApi } from "~/api";
 import { useRoute, useRouter } from "vue-router";
 import type { SaveArticle } from "~/api";
-import { formatTimestamp } from "@/utils/date";
+import { formatTimestamp } from "~/utils/date";
 
 import {
   FieldTimeOutlined,

@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { useUserApi } from '@/api';
-import type { BasicUserInfo } from '@/types/user';
+import { useUserApi } from '~/api';
+import type { BasicUserInfo } from '~/types/user';
 
 
 interface AccessState {

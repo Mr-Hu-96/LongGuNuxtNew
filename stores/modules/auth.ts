@@ -1,15 +1,15 @@
-import type { Recordable, BasicUserInfo } from '@/types';
+import type { Recordable, BasicUserInfo } from '~/types';
 
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { DEFAULT_HOME_PATH } from '@/constants';
-import {  useAccessStore, useUserStore } from '@/stores';
+import { DEFAULT_HOME_PATH } from '~/constants';
+import {  useAccessStore, useUserStore } from '~/stores';
 
 import { notification } from 'ant-design-vue';
 import { defineStore } from 'pinia';
 
-import { useAuthApi, useUserApi } from '@/api';
+import { useAuthApi, useUserApi } from '~/api';
 
 
 export const useAuthStore = defineStore('auth', () => {

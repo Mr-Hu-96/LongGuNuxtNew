@@ -139,9 +139,9 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 
-import type { BasicUserInfo } from "@/types/user";
+import type { BasicUserInfo } from "~/types/user";
 
-import { formatTimestamp } from "@/utils/date";
+import { formatTimestamp } from "~/utils/date";
 import { useRouter, useRoute } from "vue-router";
 import { useArticleApi, useUserApi } from "~/api";
 import type { SaveArticle } from "~/api";
