@@ -2,12 +2,12 @@
 import { reactive, ref } from "vue";
 
 import { FieldTimeOutlined, EyeOutlined } from "@ant-design/icons-vue";
-import { formatTimestamp } from "@/utils/date";
-import { getAllArticleListApi } from "@/api/core/article";
-import type { SaveArticle } from "@/api/core/article";
-import { getArticleCategoryListApi } from "@/api/core/article";
-import { getTdkApi } from "@/api";
-import { setTDK } from "@/utils";
+import { formatTimestamp } from "~/utils/date";
+import { getAllArticleListApi } from "~/api/core/article";
+import type { SaveArticle } from "~/api/core/article";
+import { getArticleCategoryListApi } from "~/api/core/article";
+import { getTdkApi } from "~/api";
+import { setTDK } from "~/utils";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const articleData: pageObj<SaveArticle> = reactive({

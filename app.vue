@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import type { MenuProps } from "ant-design-vue";
-import { useUserApi } from "~/apis/user"
+import { useUserApi } from "~/api/user"
 import { useAccessStore } from "~/stores/access"
 const userApi = useUserApi()
 const current = ref<string[]>(["mail"]);
