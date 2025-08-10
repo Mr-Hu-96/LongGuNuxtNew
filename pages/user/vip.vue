@@ -71,7 +71,7 @@ function openAlipayForm(days) {
 </script>
 
 <template>
-  <div class="bg-white p-4 my-4 rounded">
+  <div class="p-4 my-4 bg-white rounded">
     <div
       style="
         padding-top: 20px;
@@ -105,7 +105,7 @@ function openAlipayForm(days) {
         flex-direction: row;
         align-items: center;
       "
-      class="hover:shadow-xl duration-500"
+      class="duration-500 hover:shadow-xl"
     >
       <img
         class="cursor-pointer"
