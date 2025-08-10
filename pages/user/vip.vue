@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import {  computed, ref } from "vue";
 import { getUserListApi, createOrder } from "@/api/core/user";
-import image_super_vip from "/src/assets/super_vip.svg";
-import permanent_vip from "/src/assets/permanent_vip.png";
-import out_vip from "/src/assets/out_vip.png";
-import invite_friend_to_get_vip from "/src/assets/invite_friend_to_get_vip.png";
-import vip_card_1 from "/src/assets/vip_card_1.png";
-import vip_card_2 from "/src/assets/vip_card_2.png";
-import vip_card_3 from "/src/assets/vip_card_3.png";
-import vip_card_4 from "/src/assets/vip_card_4.png";
-import { getFlowApi } from "@/api/core/user";
-import type { BasicUserInfo } from "@/types/user";
-import { formatTimestamp } from "@/utils/date";
-import { useUserStore } from "@/stores";
+import image_super_vip from "~/assets/super_vip.svg";
+import permanent_vip from "~/assets/permanent_vip.png";
+import out_vip from "~/assets/out_vip.png";
+import invite_friend_to_get_vip from "~/assets/invite_friend_to_get_vip.png";
+import vip_card_1 from "~/assets/vip_card_1.png";
+import vip_card_2 from "~/assets/vip_card_2.png";
+import vip_card_3 from "~/assets/vip_card_3.png";
+import vip_card_4 from "~/assets/vip_card_4.png";
+import { getFlowApi } from "~/api/core/user";
+import type { BasicUserInfo } from "~/types/user";
+import { formatTimestamp } from "~/utils/date";
+import { useUserStore } from "~/stores";
 import { useRouter } from "vue-router";
 const router = useRouter();
 
