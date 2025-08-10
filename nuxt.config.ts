@@ -27,14 +27,64 @@ export default defineNuxtConfig({
   hooks: {
     'pages:extend'(pages) {
       pages.push({
+        path: '/about',
+        file: '~/pages/home/about.vue',
+        meta: { title: '关于我们' }
+      })
+      pages.push({
+        path: '/news',
+        file: '~/pages/news/index.vue',
+        meta: { title: '咨询列表' }
+      })
+      pages.push({
+        path: '/consultDetail',
+        file: '~/pages/news/detail.vue',
+        meta: { title: '咨询详情' }
+      })
+      pages.push({
+        path: '/supervise',
+        file: '~/pages/supervise/index.vue',
+        meta: { title: '监管' }
+      })
+      pages.push({
+        path: '/search',
+        file: '~/pages/home/search.vue',
+        meta: { title: '搜索' }
+      })
+      pages.push({
+        path: '/stock',
+        file: '~/pages/stock/detail.vue',
+        meta: { title: '股票详情' }
+      })
+      pages.push({
+        path: '/center',
+        file: '~/pages/user/center.vue',
+        meta: { title: '个人中心' }
+      })
+      pages.push({
+        path: '/info',
+        file: '~/pages/user/info.vue',
+        meta: { title: '用户中心' }
+      })
+      pages.push({
+        path: '/message',
+        file: '~/pages/user/message.vue',
+        meta: { title: '信息中心' }
+      })
+      pages.push({
         path: '/vip',
         file: '~/pages/user/vip.vue',
         meta: { title: '购买会员' }
       })
       pages.push({
-        path: '/about',
-        file: '~/pages/home/about.vue',
-        meta: { title: '关于我们' }
+        path: '/invitation',
+        file: '~/pages/user/invitation.vue',
+        meta: { title: '我的邀请' }
+      })
+      pages.push({
+        path: '/chooseStock',
+        file: '~/pages/user/chooseStock.vue',
+        meta: { title: '自选股' }
       })
     }
   }
