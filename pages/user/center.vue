@@ -294,16 +294,16 @@ import {
   LoadingOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-import RichTextEditor from "@/components/RichTextEditor.vue";
-import { useUserStore } from "@/stores/modules/user";
-import { useAuthStore } from "@/stores/modules/auth";
-import { uploadFile } from "@/api/core/system";
+import RichTextEditor from "~/components/RichTextEditor.vue";
+import { useUserStore } from "~/stores/modules/user";
+import { useAuthStore } from "~/stores/modules/auth";
+import { useSystemApi } from "~/api";
 import type { UploadProps } from "ant-design-vue";
 import { message } from "ant-design-vue";
-import type { BasicUserInfo } from "@/types/user";
-import { saveUserInfoApi } from "@/api/core/user";
+import type { BasicUserInfo } from "~/types/user";
+import { useUserApi } from "~/api";
 import { useCloned } from "@vueuse/core";
-import { formatTimestamp } from "@/utils/date";
+import { formatTimestamp } from "~/utils/date";
 import { useRouter } from "vue-router";
 import {
   getArticleListApi,
@@ -312,7 +312,7 @@ import {
   getArticleInfoApi,
   getArticleCategoryListApi,
 } from "@/api/core/article";
-import type { SaveArticle } from "@/api/core/article";
+import type { SaveArticle } from "~/api";
 import type { Rule } from "ant-design-vue/es/form";
 const router = useRouter();
 const userStore = useUserStore();

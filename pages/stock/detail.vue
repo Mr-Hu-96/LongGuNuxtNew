@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { useRoute } from "vue-router";
-import { formatTimestamp } from "@/utils/date";
-import { getByCode, getNewsListApi, histroyLimitUpApi } from "@/api/core/stock";
-import type { StockInfoParams } from "@/api/core/stock";
+import { formatTimestamp } from "~/utils/date";
+import { useStockApi } from "~/api";
+import type { StockInfoParams } from "~/api";
 const route = useRoute();
 const code = route.query.code as string;
 if (code) {

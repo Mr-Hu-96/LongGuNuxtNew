@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import { getRegulatoryList } from "@/api/core/system";
-import type { RegulatoryModel } from "@/api/core/system";
+import { useSystemApi } from "~/api";
+import type { RegulatoryModel } from "~/api";
 import { useRouter } from "vue-router";
-import { getTdkApi } from "@/api";
-import { setTDK } from "@/utils";
+
+import { setTDK } from "~/utils";
 getTdkApi({ module_type: "首页" }).then((res) => {
   const { title, description, keyword } = res;
   setTDK({ title, description, keyword });

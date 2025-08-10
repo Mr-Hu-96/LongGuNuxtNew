@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { getArticleInfoApi, getUserArticleApi } from "@/api/core/article";
+import { useArticleApi } from "~/api";
 import { useRoute, useRouter } from "vue-router";
-import type { SaveArticle } from "@/api/core/article";
+import type { SaveArticle } from "~/api";
 import { formatTimestamp } from "@/utils/date";
 
 import {
@@ -25,11 +25,16 @@ watch(
 );
 getData(article_id);
 function getData(article_id: string) {
-  getArticleInfoApi({ article_id }).then((res) => {
-    articleData.value = res;
+  const { getArticleInfo, getUserArticle } = useArticleApi();
+  getArticleInfo({ article_id }).then((res) => {
+    if (res) {
+      articleData.value = res;
+    }
   });
-  getUserArticleApi({ article_id }).then((res) => {
-    userArticleList.value = res;
+  getUserArticle({ article_id }).then((res) => {
+    if (res) {
+      userArticleList.value = res;
+    }
   });
 }
 </script>

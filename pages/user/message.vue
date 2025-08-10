@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { reactive } from "vue";
-import { getNoticeListApi } from "@/api/core/user";
-import type { Notice } from "@/api/core/user";
-import { formatTimestamp } from "@/utils/date";
+import { useUserApi } from "~/api";
+import type { Notice } from "~/api";
+import { formatTimestamp } from "~/utils/date";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const data: {

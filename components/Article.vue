@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import {
-  saveArticleApi,
-  getArticleInfoApi,
-  getArticleCategoryListApi,
-} from "@/api/core/article";
-import type { SaveArticle } from "@/api/core/article";
-import { uploadFile } from "@/api/core/system";
+  useArticleApi,
+} from "~/api";
+import type { SaveArticle } from "~/api";
+import { useSystemApi } from "~/api";
 import type { UploadProps } from "ant-design-vue";
 import type { Rule } from "ant-design-vue/es/form";
 import { message } from "ant-design-vue";
@@ -14,7 +12,7 @@ import {
   LoadingOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-import RichTextEditor from "@/components/RichTextEditor.vue";
+import RichTextEditor from "~/components/RichTextEditor.vue";
 const openArticle = defineModel();
 const articleItem = ref<SaveArticle>({
   content: "",

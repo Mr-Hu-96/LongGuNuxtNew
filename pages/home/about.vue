@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { getHelpListApi } from "@/api";
-import type { HelpModelList } from "@/api";
+import { useHelpApi } from "~/api";
+import type { HelpModelList } from "~/api";
 import { useRoute } from "vue-router";
 
 const tabIndex = ref(0);
@@ -17,11 +17,14 @@ function updateTabIndexByQuery() {
 }
 
 // 初始化数据
-getHelpListApi()
+const { getHelpList } = useHelpApi();
+getHelpList()
   .then((res) => {
-    tabList.value = res.list || [];
-    if (tabList.value.length > 0) {
-      updateTabIndexByQuery(); // 初次判断
+    if (res && res.list) {
+      tabList.value = res.list;
+      if (tabList.value.length > 0) {
+        updateTabIndexByQuery(); // 初次判断
+      }
     }
   })
   .catch(() => {

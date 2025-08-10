@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { getStockListApi, addFavorite } from "@/api/core/stock";
-import type { StockModelList } from "@/api/core/stock";
+import { useStockApi } from "~/api";
+import type { StockModelList } from "~/api";
 import { message } from 'ant-design-vue';
 const router = useRouter();
 const columns = [
-  { title: "代码", dataIndex: "code", align: "center" },
-  { title: "股票名称", dataIndex: "name", align: "center" },
-  { title: "涨幅", dataIndex: "increase", align: "center" },
-  { title: "流通市值", dataIndex: "circulation_value", align: "center" },
-  { title: "总市值", dataIndex: "total_value", align: "center" },
-  { title: "自选", dataIndex: "optional", align: "center" },
+  { title: "代码", dataIndex: "code", align: "center" as const },
+  { title: "股票名称", dataIndex: "name", align: "center" as const },
+  { title: "涨幅", dataIndex: "increase", align: "center" as const },
+  { title: "流通市值", dataIndex: "circulation_value", align: "center" as const },
+  { title: "总市值", dataIndex: "total_value", align: "center" as const },
+  { title: "自选", dataIndex: "optional", align: "center" as const },
 ];
 
 const dataList = ref<StockModelList[]>([]);
@@ -25,17 +25,20 @@ const pagination = ref({
 });
 
 function getData() {
-  getStockListApi({
-    keyword: searchValue.value,
+  const { getStockList } = useStockApi();
+  getStockList({
+    keyowrd: searchValue.value,
     page: pagination.value.current,
-    pageSize: pagination.value.pageSize,
+    page_size: pagination.value.pageSize,
   }).then((res) => {
-    dataList.value = res.list.map(item=>{
-      item.circulation_value = item.circulation_value+'亿'
-      item.total_value = item.total_value+'亿'
-      return item
-    });
-    pagination.value.total = res.total; // 后端返回的数据总条数
+    if (res && res.list) {
+      dataList.value = res.list.map(item => ({
+        ...item,
+        circulation_value: item.circulation_value + '亿',
+        total_value: item.total_value + '亿'
+      }));
+      pagination.value.total = res.total; // 后端返回的数据总条数
+    }
   });
 }
 
@@ -50,6 +53,7 @@ getData();
 function addFavoriteFn(record: StockModelList) {
   console.log(record);
   
+  const { addFavorite } = useStockApi();
   addFavorite({ code: record.code }).then((res) => {
     message.success("添加成功");
   });

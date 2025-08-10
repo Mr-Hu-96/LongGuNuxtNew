@@ -143,9 +143,8 @@ import type { BasicUserInfo } from "@/types/user";
 
 import { formatTimestamp } from "@/utils/date";
 import { useRouter, useRoute } from "vue-router";
-import { getArticleListApi } from "@/api/core/article";
-import { getUserInfoApi } from "@/api";
-import type { SaveArticle } from "@/api/core/article";
+import { useArticleApi, useUserApi } from "~/api";
+import type { SaveArticle } from "~/api";
 
 const router = useRouter();
 
@@ -166,14 +165,17 @@ const articleData: pageObj<SaveArticle> = reactive({
   page_size: 10,
 });
 function getArticleList() {
-  getArticleListApi({   
+  const { getArticleList } = useArticleApi();
+  getArticleList({   
     page: articleData.page,
     page_size: articleData.page_size,
     user_id: userId.value,
   })
     .then((res) => {
-      articleData.list = res.list;
-      articleData.total = res.total;
+      if (res && res.list) {
+        articleData.list = res.list;
+        articleData.total = res.total;
+      }
     })
     .catch(() => {
       articleData.list = [];
@@ -183,8 +185,11 @@ function getArticleList() {
 
 if (route.query.user_id) {
   userId.value = route.query.user_id as string;
-  getUserInfoApi({ user_id: route.query.user_id as string }).then((res) => {
-    userInfo.value = res as BasicUserInfo;
+  const { getUserInfo } = useUserApi();
+  getUserInfo({ user_id: route.query.user_id as string }).then((res) => {
+    if (res) {
+      userInfo.value = res as BasicUserInfo;
+    }
   });
   getArticleList();
 }

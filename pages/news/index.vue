@@ -3,10 +3,8 @@ import { reactive, ref } from "vue";
 
 import { FieldTimeOutlined, EyeOutlined } from "@ant-design/icons-vue";
 import { formatTimestamp } from "~/utils/date";
-import { getAllArticleListApi } from "~/api/core/article";
-import type { SaveArticle } from "~/api/core/article";
-import { getArticleCategoryListApi } from "~/api/core/article";
-import { getTdkApi } from "~/api";
+import { useArticleApi, useSystemApi } from "~/api";
+import type { SaveArticle } from "~/api";
 import { setTDK } from "~/utils";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -27,30 +25,39 @@ function onTabChange() {
 }
 getArticleCategoryList();
 function getArticleCategoryList() {
-  getArticleCategoryListApi().then((res) => {
-    categoryList.value = res.map((item) => {
-      return {
-        value: item.id,
-        label: item.name,
-      };
-    });
-    categoryId.value = categoryList.value[0].value;
-    getArticleList();
+  const { getArticleCategoryList } = useArticleApi();
+  getArticleCategoryList().then((res) => {
+    if (res) {
+      categoryList.value = res.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+      categoryId.value = categoryList.value[0].value;
+      getArticleList();
+    }
   });
 }
 function getArticleList() {
-  getAllArticleListApi({
+  const { getAllArticleList } = useArticleApi();
+  getAllArticleList({
     page: articleData.page,
     page_size: articleData.page_size,
     category_id: categoryId.value,
   }).then((res) => {
-    articleData.list = res.list;
-    articleData.total = res.total;
+    if (res && res.list) {
+      articleData.list = res.list;
+      articleData.total = res.total;
+    }
   });
 }
-getTdkApi({ module_type: "首页" }).then((res) => {
-  const { title, description, keyword } = res;
-  setTDK({ title, description, keyword });
+const { getTdk } = useSystemApi();
+getTdk({ module_type: "首页" }).then((res) => {
+  if (res) {
+    const { title, description, keyword } = res;
+    setTDK({ title, description, keyword });
+  }
 });
 </script>
 

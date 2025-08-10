@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { getInviteList } from "@/api/core/user";
+import { useUserApi } from "~/api";
 import { useClipboard } from "@vueuse/core";
-import { useUserStore } from "@/stores";
+import { useUserStore } from "~/stores";
 import { message } from "ant-design-vue";
-import { formatTimestamp } from "@/utils/date";
+import { formatTimestamp } from "~/utils/date";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const userStore = useUserStore();

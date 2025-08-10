@@ -283,17 +283,16 @@
 import { ref, watch ,computed} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { LockOutlined } from "@ant-design/icons-vue";
-import { useUserStore } from "@/stores";
-import { getTdkApi } from "@/api";
-import { setTDK } from "@/utils";
-import { getLbtd, getHot } from "@/api/core/stock";
-import { formatTimestamp } from "@/utils/date";
+import { useUserStore } from "~/stores";
+import { useSystemApi, useStockApi } from "~/api";
+import { setTDK } from "~/utils";
+import { formatTimestamp } from "~/utils/date";
 import type { SelectProps } from "ant-design-vue";
 import home_notice from "/src/assets/home_notice.png";
 import home_service from "/src/assets/home_service.png";
 import home_vip from "/src/assets/home_vip.png";
 import wechat from "/src/assets/wechat.png";
-import type { BasicUserInfo } from "@/types/user";
+import type { BasicUserInfo } from "~/types/user";
 const plainOptions = [
   { label: "主板", value: 1 },
   { label: "创业板", value: 2 },

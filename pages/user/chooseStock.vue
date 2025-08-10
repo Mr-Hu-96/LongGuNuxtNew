@@ -7,7 +7,7 @@ import {
 } from "@/api/core/stock";
 import { useRouter } from "vue-router";
 import { DeleteOutlined } from "@ant-design/icons-vue";
-import type { StockModelList } from "@/api/core/stock";
+import type { StockModelList } from "~/api";
 import { message, Modal } from "ant-design-vue";
 
 const columns = [

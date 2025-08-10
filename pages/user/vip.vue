@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {  computed, ref } from "vue";
-import { getUserListApi, createOrder } from "@/api/core/user";
+import { useUserApi } from "~/api";
 import image_super_vip from "~/assets/super_vip.svg";
 import permanent_vip from "~/assets/permanent_vip.png";
 import out_vip from "~/assets/out_vip.png";
@@ -9,7 +9,7 @@ import vip_card_1 from "~/assets/vip_card_1.png";
 import vip_card_2 from "~/assets/vip_card_2.png";
 import vip_card_3 from "~/assets/vip_card_3.png";
 import vip_card_4 from "~/assets/vip_card_4.png";
-import { getFlowApi } from "~/api/core/user";
+
 import type { BasicUserInfo } from "~/types/user";
 import { formatTimestamp } from "~/utils/date";
 import { useUserStore } from "~/stores";
@@ -17,14 +17,22 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const flowList = ref<BasicUserInfo[]>([]);
-getFlowApi().then((res) => {
-  flowList.value = res;
-});
 const vipInfo = ref({});
-getUserListApi().then((res) => {
-  vipInfo.value = res;
-  price.value = res.pricedata[0].price;
-  days.value = res.pricedata[0].days
+
+const { getFlowList, getUserList, createOrder } = useUserApi();
+
+getFlowList().then((res) => {
+  if (res) {
+    flowList.value = res;
+  }
+});
+
+getUserList().then((res) => {
+  if (res && res.pricedata && res.pricedata.length > 0) {
+    vipInfo.value = res;
+    price.value = res.pricedata[0].price;
+    days.value = res.pricedata[0].days;
+  }
 });
 
 
