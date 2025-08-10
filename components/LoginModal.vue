@@ -185,13 +185,13 @@ const loginModal = ref();
             </div>
 
             <!-- 说明 -->
-            <div class="text-center text-sm text-gray-700 mb-8">
+            <div class="mb-8 text-sm text-center text-gray-700">
               打开微信
               <span class="text-green-500">📷</span> 扫一扫，快速登录/注册
             </div>
 
             <!-- 说明文字 -->
-            <div class="text-xs text-gray-400 mt-2">
+            <div class="mt-2 text-xs text-gray-400">
               【已注册】 免费享受扫码登录，安全快捷。
               <br />
               【未注册】 用户可选择继续登录，后续可关联账号！
@@ -201,7 +201,7 @@ const loginModal = ref();
         <div class="phone-box bg-[url('/images/login/bg.png')]">
           <div class="w-[410px] rounded-lg mx-auto mt-10 p-6">
             <!-- 标题 -->
-            <div class="text-center text-lg font-bold mb-10">免密登录注册</div>
+            <div class="mb-10 text-lg font-bold text-center">免密登录注册</div>
 
             <!-- 手机号输入 -->
             <a-input
@@ -213,7 +213,7 @@ const loginModal = ref();
             />
 
             <!-- 验证码输入 -->
-            <div class="flex items-center space-x-2 mb-10">
+            <div class="flex items-center mb-10 space-x-2">
               <a-input
                 size="large"
                 v-model:value="code"
@@ -238,7 +238,7 @@ const loginModal = ref();
 
             <!-- 用户协议 -->
             <div
-              class="mt-3 mb-10 flex items-center space-x-2 text-sm text-gray-500"
+              class="flex items-center mt-3 mb-10 space-x-2 text-sm text-gray-500"
             >
               <a-checkbox v-model:checked="agree" />
               <span
@@ -248,7 +248,7 @@ const loginModal = ref();
             </div>
 
             <!-- 新用户提示 -->
-            <p class="mt-4 text-center text-gray-400 text-sm">
+            <p class="mt-4 text-sm text-center text-gray-400">
               新用户可直接登录
             </p>
           </div>

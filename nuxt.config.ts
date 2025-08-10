@@ -23,5 +23,19 @@ export default defineNuxtConfig({
     '~/plugins/global-components.client.ts',
     '~/plugins/auth.client.ts',
     '~/plugins/axios.client.ts',
-  ]
+  ],
+  hooks: {
+    'pages:extend'(pages) {
+      pages.push({
+        path: '/vip',
+        file: '~/pages/user/vip.vue',
+        meta: { title: '购买会员' }
+      })
+      pages.push({
+        path: '/about',
+        file: '~/pages/home/about.vue',
+        meta: { title: '关于我们' }
+      })
+    }
+  }
 })
