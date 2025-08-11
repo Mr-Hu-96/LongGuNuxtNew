@@ -8,11 +8,53 @@ import socketserver
 import urllib.parse
 import sys
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
+import json
+
 # Configuration
 PROXY_PORT = 3000
 TARGET_HOST = '127.0.0.1'
-TARGET_PORT = 5173
+TARGET_PORT = 8888
 TARGET_URL = "http://{}:{}".format(TARGET_HOST, TARGET_PORT) # Changed from f-string
+
+def get_http_content(url):
+    if url.startswith('http://'):
+        url = url[7:]
+    elif url.startswith('https://'):
+        url = url[8:]
+        conn = http.client.HTTPSConnection(url.split('/')[0])
+    else:
+        conn = http.client.HTTPConnection(url.split('/')[0])
+
+    path = '/' + '/'.join(url.split('/')[1:])
+
+    try:
+        conn.request("GET", path)
+        response = conn.getresponse()
+        if response.status == 200:
+            return response.read().decode('utf-8')
+        else:
+            return f"Error: {response.status} {response.reason}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+    finally:
+        conn.close()
+
+def get_meta(id_):
+    try:
+        content = get_http_content("https://api.longgu.com/api/article/info?article_id=" + str(id_))
+        data = json.loads(content)
+        new_data = {
+            "title": data["data"]["title"],
+            "abstract": data["data"]["abstract"],
+        }
+        #print(new_data)
+        return new_data
+    except Exception as e:
+        print(e)
+        return None
 
 class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
     # This dictionary maps the client's request headers to the headers
@@ -56,6 +98,7 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
         print("Incoming request path: {} (proxying to {})".format(self.path, TARGET_URL)) # Changed from f-string
 
         # 2. Extract path and query for the target request
+        print(self.path)
         parsed_url = urllib.parse.urlparse(self.path)
         target_path = parsed_url.path
         if parsed_url.query:
@@ -66,7 +109,7 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
         for header, value in self.headers.items():
             if header.lower() not in self._exclude_request_headers:
                 forward_headers[header] = value
-        
+
         # Ensure Host header is set correctly for the target server
         # This is crucial for proper routing on the target server if it's virtual-host based
         forward_headers['Host'] = "{}:{}".format(TARGET_HOST, TARGET_PORT) # Changed from f-string
@@ -75,7 +118,7 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
         try:
             # 4. Make the request to the target server
             conn = http.client.HTTPConnection(TARGET_HOST, TARGET_PORT, timeout=5) # 5-second timeout
-            
+
             # Read request body for POST/PUT/PATCH
             request_body = None
             if method in ['POST', 'PUT', 'PATCH']:
@@ -97,9 +140,24 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
                 try:
                     html_content = response_body.decode('utf-8')
                     if '</head>' in html_content:
+                        new_meta_dict = None
+
+                        if "?article_id=" in self.path:
+                            the_id = self.path.split("?article_id=")[1].split("&")[0]
+                            new_meta_dict = get_meta(the_id)
+
+                        if new_meta_dict != None:
+                            new_meta_text = '\n'
+                            new_meta_text += '<title>'+ new_meta_dict["title"] +'</title>' + "\n"
+                            new_meta_text += '<meta name="description" content="'+ new_meta_dict["abstract"] +'">' + "\n"
+                            new_meta_text += '<meta name="author" content="god">' + "\n"
+                            #<meta name="keywords" content="">
+                        else:
+                            new_meta_text = '<meta name="author" content="god">' + "\n"
+
                         modified_html = html_content.replace(
                             '</head>',
-                            '<meta name="author" content="yingshaoxo"></head>'
+                            new_meta_text + '</head>'
                         )
                         modified_body = modified_html.encode('utf-8')
                         is_html_and_modified = True # Set flag if modification occurred

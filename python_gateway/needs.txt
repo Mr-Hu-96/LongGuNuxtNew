@@ -1,0 +1,15 @@
+我知道，这些文章应该是公网不登录都可以看，所以你能不能直接给我一个简单的链接API去获取meta?
+
+比如http://xxx.com/get_meta?article_id=xxx
+
+
+
+比如当用户访问 http://localhost:8888/consultDetail?article_id=1082
+
+我python会得到article_id
+
+然后我会用python做一个小请求，得到meta数据
+
+然后我注入原html代码
+
+然后我返回给用户
