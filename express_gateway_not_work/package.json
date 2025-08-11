@@ -1,0 +1,14 @@
+{
+  "name": "express_gateway",
+  "version": "1.0.0",
+  "scripts": {
+    "run": "node index.js"
+  },
+  "author": "yingshaoxo",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "express": "5.1.0",
+    "http-proxy-middleware": "3.0.5"
+  }
+}
