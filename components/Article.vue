@@ -42,7 +42,8 @@ const coverBeforeUpload: UploadProps["beforeUpload"] = (file) => {
 };
 
 const categoryList = ref<{ value: number; label: string }[]>([]);
-getArticleCategoryListApi().then((res) => {
+const { getArticleCategoryList } = useArticleApi();
+getArticleCategoryList().then((res) => {
   categoryList.value = res.map((item) => {
     return {
       value: item.id,

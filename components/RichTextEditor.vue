@@ -23,7 +23,9 @@
 
 import { onBeforeUnmount, ref, shallowRef } from "vue";
 //import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+const { Editor, Toolbar } = await import('@wangeditor/editor-for-vue')
 //import type { IDomEditor, IToolbarConfig } from "@wangeditor/editor";
+const { IDomEditor, IToolbarConfig } = await import('@wangeditor/editor')
 import { useAccessStore } from "~/stores";
 // 编辑器实例，必须用 shallowRef
 const editorRef = shallowRef();
