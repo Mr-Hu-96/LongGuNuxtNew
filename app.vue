@@ -3,6 +3,7 @@ import { ref, watch, computed } from "vue";
 import type { MenuProps } from "ant-design-vue";
 import { useUserApi } from "~/api"
 import { useAccessStore,useUserStore } from "~/stores"
+import Article from "./components/Article.vue";
 const userApi = useUserApi()
 const current = ref<string[]>(["mail"]);
 const items = ref<MenuProps["items"]>([
