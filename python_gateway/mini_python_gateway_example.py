@@ -1,4 +1,4 @@
-# this script can't directly change vue dev server html, it can only change ./dist files when you use 'python -m http.server'
+# this script can't directly redirect to vue dev server html, it can only proxy ./dist files when you use 'python -m http.server' to serve them
 
 # author: gemini 2.5 flash
 
@@ -9,10 +9,33 @@ import urllib.parse
 import sys
 
 # Configuration
-PROXY_PORT = 3000
+PROXY_PORT = 3000 #the gateway port
 TARGET_HOST = '127.0.0.1'
-TARGET_PORT = 5173
+TARGET_PORT = 8000 #one of the service port
 TARGET_URL = "http://{}:{}".format(TARGET_HOST, TARGET_PORT) # Changed from f-string
+
+def get_http_content(url):
+    if url.startswith('http://'):
+        url = url[7:]
+    elif url.startswith('https://'):
+        url = url[8:]
+        conn = http.client.HTTPSConnection(url.split('/')[0])
+    else:
+        conn = http.client.HTTPConnection(url.split('/')[0])
+
+    path = '/' + '/'.join(url.split('/')[1:])
+
+    try:
+        conn.request("GET", path)
+        response = conn.getresponse()
+        if response.status == 200:
+            return response.read().decode('utf-8')
+        else:
+            return "Error: " + response.status + " " + response.reason
+    except Exception as e:
+        return "Error: " + str(e)
+    finally:
+        conn.close()
 
 class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
     # This dictionary maps the client's request headers to the headers
@@ -66,7 +89,7 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
         for header, value in self.headers.items():
             if header.lower() not in self._exclude_request_headers:
                 forward_headers[header] = value
-        
+
         # Ensure Host header is set correctly for the target server
         # This is crucial for proper routing on the target server if it's virtual-host based
         forward_headers['Host'] = "{}:{}".format(TARGET_HOST, TARGET_PORT) # Changed from f-string
@@ -75,7 +98,7 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
         try:
             # 4. Make the request to the target server
             conn = http.client.HTTPConnection(TARGET_HOST, TARGET_PORT, timeout=5) # 5-second timeout
-            
+
             # Read request body for POST/PUT/PATCH
             request_body = None
             if method in ['POST', 'PUT', 'PATCH']:
@@ -96,6 +119,8 @@ class CustomProxyHandler(http.server.SimpleHTTPRequestHandler):
             if 'text/html' in content_type:
                 try:
                     html_content = response_body.decode('utf-8')
+                    # here you should based on old url, to modify the new html code
+                    # if you need to get http response, you use get_http_content() function
                     if '</head>' in html_content:
                         modified_html = html_content.replace(
                             '</head>',
