@@ -3,6 +3,7 @@ import { validatePhone } from "~/utils/validate";
 import {
   useAuthApi,
   useUserApi,
+  getTicketApi
 } from "~/api";
 import { useAccessStore, useUserStore,useAuthStore } from "~/stores";
 const phone = ref("");
@@ -16,11 +17,11 @@ const getCode = () => {
   if (countdown.value > 0 || !validatePhone(phone.value)) return;
   const authApi = useAuthApi();
   authApi.smsSend({ mobile: phone.value, event: "mobilelogin" })
-    .then((res) => {
+    .then((res: any) => {
       console.log(res);
 
       countdown.value = 60; // 30秒倒计时
-      timer.value = setInterval(() => {
+      timer.value = window.setInterval(() => {
         countdown.value--;
         if (countdown.value === 0) {
           clearInterval(timer.value!);
@@ -28,7 +29,7 @@ const getCode = () => {
         }
       }, 1000);
     })
-    .catch((err) => {
+    .catch((err: any) => {
       console.log(err);
     });
 };
@@ -41,7 +42,7 @@ const submit = () => {
     return alert("请填写正确的手机号并同意用户协议");
   }
   const authApi = useAuthApi();
-  authApi.mobileLogin({ mobile: phone.value, captcha: code.value }).then((res) => {
+  authApi.mobileLogin({ mobile: phone.value, captcha: code.value }).then((res: any) => {
     authStore.fetchUserInfo()
     if (res.userinfo?.token) {
       accessStore.setAccessToken(res.userinfo?.token);
@@ -79,10 +80,19 @@ const model = computed({
 
 function getTicketFn() {
   const authApi = useAuthApi();
-  authApi.getTicket().then((res) => {
-    console.log(res);
-    ticket.value = res.ticket;
-    sceneId.value = res.scene_id;
+  getTicketApi().then((res: any) => {
+    console.log('完整的响应:', res,res.value);
+    console.log('响应类型:', typeof res);
+    console.log('是否有 ticket 属性:', 'ticket' in res);
+    console.log('ticket 的值:', res.ticket);
+    
+    // 响应拦截器已经提取了 data 字段，所以直接使用 res
+    if (res && res.ticket) {
+      ticket.value = res.ticket;
+      sceneId.value = res.scene_id;
+    }
+  }).catch((err: any) => {
+    console.error('获取微信ticket失败:', err);
   });
 }
 
@@ -100,8 +110,8 @@ function setScan() {
   if (scanTimer.value) return; // 避免重复创建轮询
   scanTimer.value = window.setInterval(() => {
     const authApi = useAuthApi();
-    authApi.checkLogin(sceneId.value).then((res) => {
-      if (res.token) {
+    authApi.checkLogin(sceneId.value).then((res: any) => {
+      if (res?.token) {
         accessStore.setAccessToken(res.token);
         clearInterval(scanTimer.value!);
         scanTimer.value = null;
@@ -151,7 +161,8 @@ const loginModal = ref();
 
 <template>
   <div class="login-modal" ref="loginModal">
-    <a-modal
+    <ClientOnly>
+      <a-modal
       v-model:open="model"
       centered
       width="820"
@@ -255,6 +266,9 @@ const loginModal = ref();
         </div>
       </div>
     </a-modal>
+      
+    </ClientOnly>
+    
   </div>
 </template>
 

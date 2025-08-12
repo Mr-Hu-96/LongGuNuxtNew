@@ -38,6 +38,10 @@ export const useAccessStore = defineStore('core-access', {
         setRefreshToken(token: AccessToken) {
             this.refreshToken = token;
         },
+        getAccessToken() {
+            return this.accessToken;
+        },
+        
     },
     persist: {
         // 持久化

@@ -4,6 +4,7 @@ import type { MenuProps } from "ant-design-vue";
 import { useUserApi } from "~/api"
 import { useAccessStore,useUserStore } from "~/stores"
 import Article from "./components/Article.vue";
+import LoginModal from "./components/LoginModal.vue";
 const userApi = useUserApi()
 const current = ref<string[]>(["mail"]);
 const items = ref<MenuProps["items"]>([
@@ -276,8 +277,8 @@ const showArticle = ref(false);
           </div>
         </div>
       </a-layout-footer>
-      <!-- <LoginModal v-if="!accessToken" v-model="loginExpired" /> -->
       <Article v-if="showArticle" v-model="showArticle" />
+      <LoginModal v-if="!accessToken" />
     </a-layout>
   </a-config-provider>
 </template>

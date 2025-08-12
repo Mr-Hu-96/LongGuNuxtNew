@@ -1,6 +1,7 @@
 import type { BasicUserInfo } from '~/types'
 import { useNuxtApp } from '#app'
 
+import httpRequest from "~/utils/request";
 export namespace AuthApi {
     /** 登录接口参数 */
     export interface LoginParams {
@@ -14,8 +15,12 @@ export namespace AuthApi {
     }
 }
 
+export const getTicketApi = () => {
+  return httpRequest.get<{ ticket: string; scene_id: number }>('/wechat/getTicket')
+}
+
 export function useAuthApi() {
-  const { $request } = useNuxtApp()
+  const $request = httpRequest
 
   return {
     /**
@@ -39,13 +44,13 @@ export function useAuthApi() {
     /**
      * 获取微信扫码ticket
      */
-    getTicket: () =>
-      $request.get<{ ticket: string; scene_id: number }>('/wechat/getTicket'),
+    // getTicket: () =>
+    //   $request.get<{ ticket: string; scene_id: number }>('/wechat/getTicket'),
 
     /**
      * 获取微信扫码状态
      */
     checkLogin: (scene_id: number) =>
-      $request.get<{ status: number; is_bind_mobile: number; token: string }>('/wechat/checkLogin', { params: { scene_id } })
+      $request.get<{ status: number; is_bind_mobile: number; token: string }>('/wechat/checkLogin', {  scene_id })
   }
 }

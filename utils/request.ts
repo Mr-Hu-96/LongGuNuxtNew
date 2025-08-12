@@ -1,77 +1,118 @@
-// utils/request.ts
+// service/index.ts
+import type { UseFetchOptions } from "nuxt/app";
+import { useNuxtApp } from "#app";
 
-import { useAccessStore } from '~/stores'
-import { message } from 'ant-design-vue'
+type Methods = "GET" | "POST" | "DELETE" | "PUT";
 
-export interface RequestOptions {
-  params?: Record<string, any>     // GET/DELETE 参数
-  body?: any                       // POST/PUT 数据
-  headers?: HeadersInit            // 自定义请求头
-  auth?: boolean                   // 是否附带 token，默认 true
+export interface IResultData<T> {
+  code: number;
+  data: T;
+  msg: string;
 }
 
-/**
- * 通用请求方法
- */
-async function coreRequest<T>(
-  url: string,
-  method: 'get' | 'post' | 'put' | 'delete',
-  options: RequestOptions = {}
-): Promise<T | null> {
-  const config = useRuntimeConfig()
-  const baseURL = config.public.apiBase as string
-  const accessStore = useAccessStore()
-  const token = accessStore.getAccessToken()
-  try {
-    const { data, error } = await useFetch<T>(baseURL + url, {
-      method: method as any, // 避免类型冲突
-      onRequest({ request, options }) {
-        // 设置请求头
-        // 请注意，这依赖于 ofetch >= 1.4.0 - 您可能需要刷新您的锁文件
-        options.headers.set('Authorization', "Bearer "+accessStore.getAccessToken())
-      },
-      query: method === 'get' || method === 'delete' ? getFormData(options.params,token) : getFormData({},token),
-      body: method === 'post' || method === 'put' ? getFormData(options.body,token) ?? getFormData(options.params,token) : null,
-      watch: false,
-      key: `${method}:${url}:${JSON.stringify(options.params || options.body || '')}`,
-    })
+class HttpRequest {
+  async request<T = any>(
+    url: string,
+    method: Methods,
+    data?: any,
+    options?: UseFetchOptions<T>
+  ) {
+    const config = useRuntimeConfig();
+    const BASE_URL = config.public.apiBase as string;
 
-    if (error.value) throw error.value
-    return data.value as T
-  } catch (err: any) {
-    if (process.client) {
-      const msg = err?.data?.message || err.message || '请求失败'
-      message.error(msg)
+    // 拼装请求配置
+    const newOptions: any = {
+      baseURL: BASE_URL,
+      method,
+      ...options,
+      headers: {
+        ...(options?.headers || {})
+      }
+    };
+
+    const token = useCookie("token");
+    if (token.value) {
+      newOptions.headers.Authorization = `Bearer ${token.value}`;
     }
-    return null
+
+    if (method === "GET" || method === "DELETE") {
+      newOptions.params = data;
+    }
+    if (method === "POST" || method === "PUT") {
+      newOptions.body = data;
+    }
+
+    const nuxtApp = useNuxtApp();
+
+    try {
+      let responseData: any;
+
+      if (process.client && !nuxtApp.isHydrating) {
+        // 客户端正常阶段 → 用 nuxtApp.$request
+        
+        responseData = await $fetch(url, newOptions);
+        console.log(responseData);
+      } else {
+        // SSR 或 hydration 阶段 → 用 $fetch（直接返回最终数据）
+        responseData = await $fetch<IResultData<T>>(url, newOptions);
+      }
+
+      return responseData.data;
+    } catch (error: any) {
+      let errorMessage = "服务端错误";
+
+      if (error.response && error.response._data) {
+        let data = error.response._data;
+        if (typeof data === "string") {
+          try {
+            data = JSON.parse(data);
+          } catch {
+            errorMessage = data;
+          }
+        }
+        if (data.errors) {
+          const errorMessages = [];
+          for (const key in data.errors) {
+            errorMessages.push(`${data.errors[key].join(", ")}`);
+          }
+          errorMessage = errorMessages.join("; ") || errorMessage;
+        } else {
+          errorMessage = data.message || errorMessage;
+        }
+      }
+
+      if (process.client) {
+        console.error(errorMessage);
+      }
+
+      // 特定错误码直接返回
+      if (
+        error.response &&
+        [40001, 40002, 40003].includes(error.response._data.code)
+      ) {
+        return error.response._data;
+      }
+
+      throw error.response ? error.response._data : errorMessage;
+    }
+  }
+
+  get<T = any>(url: string, params?: any, options?: UseFetchOptions<T>) {
+    return this.request(url, "GET", params, options);
+  }
+
+  post<T = any>(url: string, data?: any, options?: UseFetchOptions<T>) {
+    return this.request(url, "POST", data, options);
+  }
+
+  put<T = any>(url: string, data: any, options?: UseFetchOptions<T>) {
+    return this.request(url, "PUT", data, options);
+  }
+
+  delete<T = any>(url: string, params: any, options?: UseFetchOptions<T>) {
+    return this.request(url, "DELETE", params, options);
   }
 }
 
-function getFormData(obj: Record<string, any>,token: string) {
-
-
-  const formData = new FormData()
-  formData.append('token',token )
-  if (!obj) return formData
-  for (const [key, value] of Object.entries(obj)) {
-    console.log(key, value);
-
-    formData.append(key, value)
-  }
-  console.log(obj, formData);
-  return formData
-}
-
-export const request = {
-  get: <T>(url: string, params?: RequestOptions['params'], options?: Omit<RequestOptions, 'params'>) =>
-    coreRequest<T>(url, 'get', { ...options, params }),
-
-  post: <T>(url: string, body?: RequestOptions['body'], options?: Omit<RequestOptions, 'body'>) =>
-    coreRequest<T>(url, 'post', { ...options, body }),
-
-  put: <T>(url: string, body?: RequestOptions['body'], options?: Omit<RequestOptions, 'body'>) =>
-    coreRequest<T>(url, 'put', { ...options, body }),
-
-  delete: <T>(url: string, params?: RequestOptions['params'], options?: Omit<RequestOptions, 'params'>) =>
-    coreRequest<T>(url, 'delete', { ...options, params }),
-}
+const httpRequest = new HttpRequest();
+export default httpRequest;
