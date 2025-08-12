@@ -1,21 +1,21 @@
 import type { BasicUserInfo } from '~/types'
 import { useNuxtApp } from '#app'
-
+import httpRequest from "~/utils/request";
 export function useArticleApi() {
-  const { $request } = useNuxtApp()
+  const $request = httpRequest
 
   return {
     /**
      * 获取文章列表
      */
     getArticleList: (params: ArticleParams) =>
-      $request.get<{ list: SaveArticle[], total: number }>('/user/articleList', { params }),
+      $request.get<{ list: SaveArticle[], total: number }>('/user/articleList', params),
 
     /**
      * 获取文章详情
      */
     getArticleInfo: (params: { article_id: string }) =>
-      $request.get<SaveArticle>('/article/info', { params }),
+      $request.get<SaveArticle>('/article/info', params),
 
     /**
      * 获取文章类别
@@ -45,13 +45,13 @@ export function useArticleApi() {
      * 获取所有文章列表
      */
     getAllArticleList: (params: ArticleListParams) =>
-      $request.get<{ list: SaveArticle[], total: number }>('/article/list', { params }),
+      $request.get<{ list: SaveArticle[], total: number }>('/article/list', params),
 
     /**
      * 获取文章用户发布列表
      */
     getUserArticle: (params: { article_id: string }) =>
-      $request.get<SaveArticle[]>('/article/getUserArticle', { params })
+      $request.get<SaveArticle[]>('/article/getUserArticle', params)
   }
 }
 

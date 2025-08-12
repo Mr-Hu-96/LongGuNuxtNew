@@ -1,7 +1,7 @@
 import { useNuxtApp } from '#app'
-
+import httpRequest from "~/utils/request";
 export function useSystemApi() {
-  const { $request } = useNuxtApp()
+  const $request = httpRequest
 
   return {
     /**
@@ -14,13 +14,13 @@ export function useSystemApi() {
      * 监管中心
      */
     getRegulatoryList: (params: SystemRegulatory) =>
-      $request.get<RegulatoryModel>('/regulatory_center/consolidated', { params }),
+      $request.get<RegulatoryModel>('/regulatory_center/consolidated', params),
 
     /**
      * 获取TDK
      */
     getTdk: (params: { module_type: '首页' | '资讯' | '详情' }) =>
-      $request.get<any>('/seo/getTdk', { params })
+      $request.get<any>('/seo/getTdk', params)
   }
 }
 

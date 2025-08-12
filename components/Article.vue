@@ -12,7 +12,7 @@ import {
   LoadingOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-import RichTextEditor from "~/components/RichTextEditor.vue";
+import RichTextEditor from "~/components/RichTextEditor.client.vue";
 const openArticle = defineModel();
 const articleItem = ref<SaveArticle>({
   content: "",
@@ -33,8 +33,11 @@ const rules: Record<string, Rule[]> = {
 };
 
 const articleFormRef = ref();
+const { uploadFile } = useSystemApi();
 const coverBeforeUpload: UploadProps["beforeUpload"] = (file) => {
-  uploadFile({ file }).then((res) => {
+  console.log(file);
+  
+  uploadFile({file:file as File}).then((res) => {
     articleItem.value.cover = res.fullurl;
   });
   // ⚠️ 阻止默认上传行为
@@ -42,7 +45,7 @@ const coverBeforeUpload: UploadProps["beforeUpload"] = (file) => {
 };
 
 const categoryList = ref<{ value: number; label: string }[]>([]);
-const { getArticleCategoryList } = useArticleApi();
+const { getArticleCategoryList,saveArticle } = useArticleApi();
 getArticleCategoryList().then((res) => {
   categoryList.value = res.map((item) => {
     return {
@@ -52,11 +55,11 @@ getArticleCategoryList().then((res) => {
   });
 });
 
-function saveArticle() {
+function saveArticleFn() {
   articleFormRef.value
     .validate()
     .then(() => {
-      saveArticleApi(articleItem.value).then((res) => {
+      saveArticle(articleItem.value).then((res) => {
         message.success("创建成功");
         openArticle.value = false;
       });
@@ -72,7 +75,7 @@ function saveArticle() {
     <a-modal
       v-model:open="openArticle"
       title="创作文章"
-      @ok="saveArticle"
+      @ok="saveArticleFn"
       width="90%"
     >
       <a-form
@@ -121,7 +124,8 @@ function saveArticle() {
           <a-textarea v-model:value="articleItem.abstract" />
         </a-form-item>
       </a-form>
-      <RichTextEditor v-model="articleItem.content" />
+      <ClientOnly><RichTextEditor  v-model="articleItem.content" /> </ClientOnly>
+
     </a-modal>
   </div>
 </template>

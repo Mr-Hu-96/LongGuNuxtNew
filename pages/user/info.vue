@@ -48,7 +48,7 @@
                 <div
                   class="flex w-full h-[120px] bg-white p-4 rounded-sm shadow my-2 cursor-pointer"
                   @click="
-                    router.push('/consultDetail?article_id=' + item.article_id)
+                    router.push('/consultDetail/' + item.article_id)
                   "
                 >
                   <img

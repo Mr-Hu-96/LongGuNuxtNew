@@ -55,7 +55,7 @@
                 <div
                   class="flex w-full h-[120px] bg-white p-4 rounded-sm shadow my-2 cursor-pointer"
                   @click="
-                    router.push('/consultDetail?article_id=' + item.article_id)
+                    router.push('/consultDetail/' + item.article_id)
                   "
                 >
                   <img
@@ -282,7 +282,8 @@
           <a-textarea v-model:value="articleItem.abstract" />
         </a-form-item>
       </a-form>
-      <RichTextEditor v-model="articleItem.content" />
+      <ClientOnly><RichTextEditor v-if="articleItem.content" v-model="articleItem.content" /> </ClientOnly>
+      
     </a-modal>
   </div>
 </template>
@@ -294,7 +295,7 @@ import {
   LoadingOutlined,
   PlusOutlined,
 } from "@ant-design/icons-vue";
-import RichTextEditor from "~/components/RichTextEditor.vue";
+import RichTextEditor from "~/components/RichTextEditor.client.vue";
 import { useUserStore } from "~/stores/modules/user";
 import { useAuthStore } from "~/stores/modules/auth";
 import { useSystemApi, useArticleApi, useUserApi } from "~/api";

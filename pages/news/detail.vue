@@ -14,23 +14,27 @@ import {
 const route = useRoute();
 const router = useRouter();
 
-const article_id = route.query.article_id as string;
+const article_id = route.params.article_id as string;
 const articleData = ref<SaveArticle>({} as SaveArticle);
 const userArticleList = ref<SaveArticle[]>([]);
 watch(
-  () => route.query,
+  () => route.params,
   ({ article_id }) => {
     getData(article_id as string);
   }
 );
+const { getArticleInfo, getUserArticle } = useArticleApi();
 getData(article_id);
+const { data: tdk } = await useAsyncData('tdk', () => getArticleInfo({ article_id }))
+articleData.value = tdk.value as SaveArticle;
+useHead(() => ({
+  title: articleData.value?.title || '',
+  meta: [
+    { name: 'description', content: articleData.value?.abstract || '' },
+  ],
+}))
 function getData(article_id: string) {
-  const { getArticleInfo, getUserArticle } = useArticleApi();
-  getArticleInfo({ article_id }).then((res) => {
-    if (res) {
-      articleData.value = res;
-    }
-  });
+
   getUserArticle({ article_id }).then((res) => {
     if (res) {
       userArticleList.value = res;
@@ -57,7 +61,7 @@ function getData(article_id: string) {
     "
   >
     <div class="flex-1">
-      <div class="bg-white p-4">
+      <div class="p-4 bg-white">
         <div style="font-size: 150%; font-weight: bold">
           {{ articleData.title }}
         </div>
@@ -79,10 +83,10 @@ function getData(article_id: string) {
       </div>
 
       <div
-        class="mt-2 bg-white p-4 html-box"
+        class="p-4 mt-2 bg-white html-box"
         v-html="articleData.content"
       ></div>
-      <div class="mt-2 bg-white p-4">
+      <div class="p-4 mt-2 bg-white">
         <span class="text-[#5F90EA]"> 版权及免责声明：</span
         >本文内容由入驻龙股网的作者自发贡献，该文观点仅代表作者本人，与本网站立场无关，不对您构成任何投资建议。用户应基于自己的独立判断，自行决策投资行为并承担全部风险。本站仅提供信息存储空间服务，不拥有所有权，不承担相关法律责任。如发现本站有涉嫌抄袭侵权/违法违规的内容，请发送邮件至26688@qq.com
         举报，一经查实，本站将立刻删除。
@@ -97,10 +101,10 @@ function getData(article_id: string) {
       >
         <div
           v-if="articleData.prev"
-          class="left_or_right_button cursor-pointer"
+          class="cursor-pointer left_or_right_button"
           @click="
             router.push(
-              '/consultDetail?article_id=' + articleData.prev?.article_id
+              '/consultDetail/' + articleData.prev?.article_id
             )
           "
         >
@@ -108,10 +112,10 @@ function getData(article_id: string) {
         </div>
         <div
           v-if="articleData.next"
-          class="left_or_right_button cursor-pointer"
+          class="cursor-pointer left_or_right_button"
           @click="
             router.push(
-              '/consultDetail?article_id=' + articleData.next?.article_id
+              '/consultDetail/' + articleData.next?.article_id
             )
           "
         >
@@ -120,7 +124,7 @@ function getData(article_id: string) {
       </div>
     </div>
     <div class="w-[230px] pl-4">
-      <div class="bg-white p-2">
+      <div class="p-2 bg-white">
         <div
           class="flex cursor-pointer"
           @click="router.push('/info?user_id=' + articleData.user_info.id)"
@@ -150,7 +154,7 @@ function getData(article_id: string) {
             "
           >
             <div class="text-[#999999]">文章</div>
-            <div class="font-bold mt-4">
+            <div class="mt-4 font-bold">
               {{ articleData?.user_info?.article_num }}
             </div>
           </div>
@@ -163,13 +167,13 @@ function getData(article_id: string) {
             "
           >
             <div class="text-[#999999]">浏览量</div>
-            <div class="font-bold mt-4">
+            <div class="mt-4 font-bold">
               {{ articleData?.user_info?.user_visit_num }}
             </div>
           </div>
         </div>
       </div>
-      <div class="bg-white mt-2 p-2">
+      <div class="p-2 mt-2 bg-white">
         <div
           style="
             margin-top: 10px;
@@ -192,7 +196,7 @@ function getData(article_id: string) {
             v-for="item in userArticleList"
             class="cursor-pointer"
             style="margin-top: 20px"
-            @click="router.push('/consultDetail?article_id=' + item.article_id)"
+            @click="router.push('/consultDetail/' + item.article_id)"
           >
             {{ item.title }}
           </div>

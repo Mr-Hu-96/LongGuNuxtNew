@@ -1,7 +1,7 @@
 // api/user.ts
 import type { BasicUserInfo } from '~/types'
 import { useNuxtApp } from '#app'
-
+import httpRequest from "~/utils/request";
 interface UserParams {
   user_id?: string
 }
@@ -33,7 +33,7 @@ export interface Notice {
 }
 
 export function useUserApi() {
-  const { $request } = useNuxtApp()
+  const  $request  = httpRequest
 
   return {
     /**

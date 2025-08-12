@@ -5,7 +5,8 @@ import type { RegulatoryModel } from "~/api";
 import { useRouter } from "vue-router";
 
 import { setTDK } from "~/utils";
-getTdkApi({ module_type: "首页" }).then((res) => {
+const { getTdk,getRegulatoryList } = useSystemApi();
+getTdk({ module_type: "首页" }).then((res) => {
   const { title, description, keyword } = res;
   setTDK({ title, description, keyword });
 });
@@ -21,7 +22,7 @@ getRegulatoryList(queryParams).then((res) => {
 </script>
 
 <template>
-  <div class="mt-4 p-2 bg-white">
+  <div class="p-2 mt-4 bg-white">
     <div style="display: flex; flex-direction: row; align-items: center">
       <a-typography-title :level="4" style="padding-right: 8px"
         >异动停牌:</a-typography-title

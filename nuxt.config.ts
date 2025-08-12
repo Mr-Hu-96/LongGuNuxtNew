@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'node:url'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -16,6 +17,21 @@ export default defineNuxtConfig({
       apiBase: 'https://api.longgu.com/api' // 可用 process.env.API_BASE 注入
     }
   },
+  // 添加 SSR 配置来解决 wangeditor 兼容性问题
+  ssr: true,
+  nitro: {
+    experimental: {
+      wasm: true
+    }
+  },
+  vite: {
+    ssr: {
+      noExternal: ['@wangeditor/editor', '@wangeditor/editor-for-vue']
+    },
+    define: {
+      global: 'globalThis'
+    }
+  },
   plugins: [
     '~/plugins/antd.client.ts',
     '~/plugins/utils.client.ts',
@@ -23,6 +39,7 @@ export default defineNuxtConfig({
     '~/plugins/global-components.client.ts',
     '~/plugins/auth.client.ts',
     '~/plugins/axios.client.ts',
+    '~/plugins/wangeditor.client.ts',
   ],
   hooks: {
     'pages:extend'(pages) {
@@ -37,8 +54,8 @@ export default defineNuxtConfig({
         meta: { title: '咨询列表' }
       })
       pages.push({
-        path: '/consultDetail',
-        file: '~/pages/news/detail.vue',
+        path: '/consultDetail/:article_id',
+        file: fileURLToPath(new URL('./pages/news/detail.vue', import.meta.url)),
         meta: { title: '咨询详情' }
       })
       pages.push({

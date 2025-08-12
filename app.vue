@@ -77,9 +77,19 @@ const onLogin = () => {
 const accessToken = computed(() => {
   return accessStore.accessToken;
 });
-const loginExpired = computed(() => {
-  return accessStore.loginExpired;
-});
+
+const isClient = ref(false)
+onMounted(() => {
+  isClient.value = true
+})
+
+const showLogin = computed(() => {
+  // 只有客户端渲染并且没有token才显示登录按钮
+  return isClient.value && !accessToken.value
+})
+
+const showUserUI = computed(() => isClient.value && !!accessToken.value);
+
 watch(
   () => accessToken.value,
   (newToken) => {
@@ -103,7 +113,7 @@ function handleEnterPressed(){
   // searchValue
   // router.push('/search')
 }
-
+const logoPath = "/images/header/logo2x.png";
 const showArticle = ref(false);
 </script>
 <template>
@@ -158,11 +168,11 @@ const showArticle = ref(false);
               会员中心
             </a-button>
           </div>
-          <div class="mr-2 vip-btn" v-if="!accessToken">
+          <div class="mr-2 vip-btn" v-if="showLogin">
             <a-button ghost @click="onLogin"> 登录/注册 </a-button>
           </div>
-          <a-avatar :src="userStore.userInfo?.avatar" />
-          <a-dropdown>
+          <a-avatar v-if="showUserUI" :src="userStore.userInfo?.avatar" />
+          <a-dropdown v-if="showUserUI">
             <a class="ant-dropdown-link" @click.prevent>
               {{ userStore.userInfo?.nickname }}
               <DownOutlined />
@@ -209,7 +219,7 @@ const showArticle = ref(false);
           <div class="flex center-box">
             <!-- 左侧LOGO -->
             <div class="flex-1 logo">
-              <img src="/images/header/logo2x.png" alt="" srcset="" />
+              <img :src="logoPath" alt="" srcset="" />
             </div>
             <!-- 其他栏目 -->
 
@@ -278,7 +288,7 @@ const showArticle = ref(false);
         </div>
       </a-layout-footer>
       <Article v-if="showArticle" v-model="showArticle" />
-      <LoginModal v-if="!accessToken" />
+      <LoginModal v-if="showLogin" />
     </a-layout>
   </a-config-provider>
 </template>

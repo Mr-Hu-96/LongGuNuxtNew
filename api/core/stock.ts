@@ -1,14 +1,14 @@
 import { useNuxtApp } from '#app'
-
+import httpRequest from "~/utils/request";
 export function useStockApi() {
-  const { $request } = useNuxtApp()
+  const  $request  = httpRequest
 
   return {
     /**
      * 股票查询列表
      */
     getStockList: (params: StockParams) =>
-      $request.get<StockModel>('/stock/list', { params }),
+      $request.get<StockModel>('/stock/list', params),
 
     /**
      * 添加自选
@@ -38,19 +38,19 @@ export function useStockApi() {
      * 查询股票基本信息
      */
     getByCode: (params: { code: string }) =>
-      $request.get<StockInfoParams>('/stock/getByCode', { params }),
+      $request.get<StockInfoParams>('/stock/getByCode', params),
 
     /**
      * 股票详情-个股快讯
      */
     getNewsList: (params: { code: string }) =>
-      $request.get<StockInfoParams>('/stock/getNewsList', { params }),
+      $request.get<StockInfoParams>('/stock/getNewsList', params),
 
     /**
      * 股票详情-历史涨停
      */
     histroyLimitUp: (params: { code: string }) =>
-      $request.get<StockInfoParams>('/stock/histroyLimitUp', { params }),
+      $request.get<StockInfoParams>('/stock/histroyLimitUp', params),
 
     /**
      * 获取龙板通达

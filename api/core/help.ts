@@ -1,7 +1,7 @@
 import { useNuxtApp } from '#app'
-
+import httpRequest from "~/utils/request";
 export function useHelpApi() {
-  const { $request } = useNuxtApp()
+  const $request = httpRequest
 
   return {
     /**

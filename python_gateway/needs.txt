@@ -4,7 +4,7 @@
 
 
 
-比如当用户访问 http://localhost:8888/consultDetail?article_id=1082
+比如当用户访问 http://localhost:8888/consultDetail/1082
 
 我python会得到article_id
 

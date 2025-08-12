@@ -34,7 +34,7 @@ function getArticleCategoryList() {
           label: item.name,
         };
       });
-      categoryId.value = categoryList.value[0].value;
+      categoryId.value = categoryList.value[0]?.value;
       getArticleList();
     }
   });
@@ -52,19 +52,23 @@ function getArticleList() {
     }
   });
 }
+
 const { getTdk } = useSystemApi();
-getTdk({ module_type: "首页" }).then((res) => {
-  if (res) {
-    const { title, description, keyword } = res;
-    setTDK({ title, description, keyword });
-  }
-});
+const { data: tdk } = await useAsyncData('tdk', () => getTdk({ module_type: '资讯' }))
+
+useHead(() => ({
+  title: tdk.value?.title || '',
+  meta: [
+    { name: 'description', content: tdk.value?.description || '' },
+    { name: 'keywords', content: tdk.value?.keyword || '' },
+  ],
+}))
 </script>
 
 <template>
   <div style="padding-top: 20px"></div>
   <div class="news-container">
-    <a-tabs v-model:activeKey="categoryId" @change="onTabChange">
+    <a-tabs v-if="categoryList.length > 0" v-model:activeKey="categoryId" @change="onTabChange">
       <a-tab-pane
         v-for="item in categoryList"
         :key="item.value"
@@ -74,7 +78,7 @@ getTdk({ module_type: "首页" }).then((res) => {
     </a-tabs>
     <div
       v-if="articleData.list.length === 0"
-      class="flex items-center flex-col mt-2 py-4"
+      class="flex flex-col items-center py-4 mt-2"
     >
       <img class="pt-[48px]" src="/images/user/empty.png" alt="empty" />
       <div class="py-10">这里什么都没有，赶紧创作吧~</div>
@@ -83,7 +87,7 @@ getTdk({ module_type: "首页" }).then((res) => {
       v-for="item in articleData.list"
       :key="item.article_id"
       class="mb-2 h-[160px] flex flex-row bg-[#fff] p-4 cursor-pointer"
-      @click="router.push('/consultDetail?article_id=' + item.article_id)"
+      @click="router.push('/consultDetail/' + item.article_id)"
     >
       <div
         style="
