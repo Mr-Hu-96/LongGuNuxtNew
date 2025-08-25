@@ -25,12 +25,12 @@ watch(
 );
 const { getArticleInfo, getUserArticle } = useArticleApi();
 getData(article_id);
-const { data: tdk } = await useAsyncData('tdk', () => getArticleInfo({ article_id }))
+const { data: tdk } = await useAsyncData('article'+article_id,() => getArticleInfo({ article_id }))
 articleData.value = tdk.value as SaveArticle;
 useHead(() => ({
-  title: articleData.value?.title || '',
+  title: tdk.value?.title || '',
   meta: [
-    { name: 'description', content: articleData.value?.abstract || '' },
+    { name: 'description', content: tdk.value?.abstract || '' },
   ],
 }))
 function getData(article_id: string) {

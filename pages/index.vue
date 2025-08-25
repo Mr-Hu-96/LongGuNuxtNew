@@ -404,7 +404,7 @@ watch(
   }
 );
 const { getTdk } = useSystemApi();
-const { data: tdk } = await useAsyncData('tdk', () => getTdk({ module_type: '首页' }))
+const { data: tdk } = await useAsyncData(() => getTdk({ module_type: '首页' }))
 
 useHead(() => ({
   title: tdk.value?.title || '',
