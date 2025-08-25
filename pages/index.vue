@@ -33,6 +33,7 @@
               {{ item }}
             </a-button>
             <a-select
+            v-if="isClient"
               v-model:value="leftCurrentDate"
               class="w-[115px] !shadow-none !border-none bg-transparent"
               :dropdown-style="{ boxShadow: 'none' }"
@@ -153,6 +154,7 @@
               {{ item }}
             </a-button>
             <a-select
+            v-if="isClient"
               v-model:value="rightCurrentDate"
               class="w-[115px] !shadow-none !border-none bg-transparent"
               :dropdown-style="{ boxShadow: 'none' }"
@@ -289,7 +291,6 @@ import { useRoute, useRouter } from "vue-router";
 import { LockOutlined } from "@ant-design/icons-vue";
 import { useUserStore } from "~/stores";
 import { useSystemApi,useStockApi } from "~/api";
-import { setTDK } from "~/utils";
 
 import { formatTimestamp } from "~/utils/date";
 import type { SelectProps } from "ant-design-vue";
@@ -303,12 +304,18 @@ const plainOptions = [
   { label: "创业板", value: 2 },
   { label: "ST", value: 3 },
 ];
+
+const isClient = ref(false);
+onMounted(() => {
+  isClient.value = true;
+});
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 if (route?.query?.invite_code) {
   userStore.setInviteCode(route.query.invite_code as string);
 }
+const showService = ref(false);
 const userInfo = computed(() => {
   return (userStore.userInfo as BasicUserInfo) || {};
 });

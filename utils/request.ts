@@ -14,13 +14,19 @@
 
   class HttpRequest {
     /**
-     * 检查对象是否包含文件
+     * 检查对象是否包含文件（支持嵌套）
      */
     private hasFile(obj: any): boolean {
       if (!obj || typeof obj !== 'object') return false;
-      
+  
+      const hasFileCtor = typeof File !== 'undefined';
+      const hasBlobCtor = typeof Blob !== 'undefined';
+  
       for (const value of Object.values(obj)) {
-        if (value instanceof File || value instanceof Blob) {
+        if (
+          (hasFileCtor && value instanceof File) ||
+          (hasBlobCtor && value instanceof Blob)
+        ) {
           return true;
         }
         if (value && typeof value === 'object' && this.hasFile(value)) {
@@ -29,7 +35,32 @@
       }
       return false;
     }
-
+  
+    /**
+     * 递归将对象转为 FormData
+     */
+    private toFormData(obj: any, formData = new FormData(), parentKey?: string) {
+      Object.entries(obj).forEach(([key, value]) => {
+        const fieldKey = parentKey ? `${parentKey}[${key}]` : key;
+  
+        if (value === null || value === undefined) return;
+  
+        if (
+          (typeof File !== 'undefined' && value instanceof File) ||
+          (typeof Blob !== 'undefined' && value instanceof Blob)
+        ) {
+          formData.append(fieldKey, value);
+        } else if (Array.isArray(value)) {
+          value.forEach((v, i) => this.toFormData(v, formData, `${fieldKey}[${i}]`));
+        } else if (typeof value === 'object') {
+          this.toFormData(value, formData, fieldKey);
+        } else {
+          formData.append(fieldKey, String(value));
+        }
+      });
+      return formData;
+    }
+  
     async request<T = any>(
       url: string,
       method: Methods,
@@ -38,8 +69,7 @@
     ) {
       const config = useRuntimeConfig();
       const BASE_URL = config.public.apiBase as string;
-
-      // 拼装请求配置
+  
       const newOptions: any = {
         baseURL: BASE_URL,
         method,
@@ -48,63 +78,46 @@
           ...(options?.headers || {})
         }
       };
+  
+      // token 处理
       const accessStore = useAccessStore();
       const token = accessStore.getAccessToken();
-      
       if (token) {
-        // 把 token 放到 query 参数里
-        if (!newOptions.params) {
-          newOptions.params = {};
-        }
-        newOptions.params.token = token;
+        newOptions.params = { ...(newOptions.params || {}), token };
       }
-      if (method === "GET" || method === "DELETE") {
-        newOptions.params = {
-          ...(newOptions.params || {}),
-          ...(data || {})
-        };
+  
+      // GET / DELETE 参数直接走 query
+      if (method === 'GET' || method === 'DELETE') {
+        newOptions.params = { ...(newOptions.params || {}), ...(data || {}) };
       }
-      if (method === "POST" || method === "PUT") {
-        // 检查是否包含文件对象，如果有则转换为 FormData
-        if (data && typeof data === 'object' && this.hasFile(data)) {
-          const formData = new FormData();
-          Object.entries(data).forEach(([key, value]) => {
-            if (value instanceof File || value instanceof Blob) {
-              formData.append(key, value);
-            } else if (value !== null && value !== undefined) {
-              formData.append(key, String(value));
-            }
-          });
-          newOptions.body = formData;
-          // 不要设置 Content-Type，让浏览器自动设置 boundary
-          delete newOptions.headers['Content-Type'];
+  
+      // POST / PUT 处理
+      if (method === 'POST' || method === 'PUT') {
+        if (process.client) {
+          // 客户端检测文件
+          if (data && typeof data === 'object' && this.hasFile(data)) {
+            newOptions.body = this.toFormData(data);
+            delete newOptions.headers['Content-Type']; // 让浏览器自动设置 boundary
+          } else {
+            newOptions.body = data;
+          }
         } else {
+          // SSR 阶段直接当 JSON 发
           newOptions.body = data;
         }
       }
-
+  
       const nuxtApp = useNuxtApp();
-
+  
       try {
-        let responseData: any;
-
-        if (process.client && !nuxtApp.isHydrating) {
-          // 客户端正常阶段 → 用 nuxtApp.$request
-
-          responseData = await $fetch(url, newOptions);
-          console.log(responseData);
-        } else {
-          // SSR 或 hydration 阶段 → 用 $fetch（直接返回最终数据）
-          responseData = await $fetch<IResultData<T>>(url, newOptions);
-        }
-
+        const responseData = await $fetch<IResultData<T>>(url, newOptions);
         return responseData.data;
       } catch (error: any) {
-        let errorMessage = "服务端错误";
-
+        let errorMessage = '服务端错误';
+  
         if (error.response && error.response._data) {
           let data = error.response._data;
-          if (typeof data === "string") {
+          if (typeof data === 'string') {
             try {
               data = JSON.parse(data);
             } catch {
@@ -112,20 +125,18 @@
             }
           }
           if (data.errors) {
-            const errorMessages = [];
-            for (const key in data.errors) {
-              errorMessages.push(`${data.errors[key].join(", ")}`);
-            }
-            errorMessage = errorMessages.join("; ") || errorMessage;
+            errorMessage = Object.values(data.errors)
+              .map((msgs: any) => msgs.join(', '))
+              .join('; ') || errorMessage;
           } else {
             errorMessage = data.message || errorMessage;
           }
         }
-
+  
         if (process.client) {
           console.error(errorMessage);
         }
-
+  
         // 特定错误码直接返回
         if (
           error.response &&
@@ -133,27 +144,25 @@
         ) {
           return error.response._data;
         }
-
+  
         throw error.response ? error.response._data : errorMessage;
       }
     }
-
+  
     get<T = any>(url: string, params?: any, options?: UseFetchOptions<T>) {
-      return this.request(url, "GET", params, options);
+      return this.request(url, 'GET', params, options);
     }
-
     post<T = any>(url: string, data?: any, options?: UseFetchOptions<T>) {
-      return this.request(url, "POST", data, options);
+      return this.request(url, 'POST', data, options);
     }
-
     put<T = any>(url: string, data: any, options?: UseFetchOptions<T>) {
-      return this.request(url, "PUT", data, options);
+      return this.request(url, 'PUT', data, options);
     }
-
     delete<T = any>(url: string, params: any, options?: UseFetchOptions<T>) {
-      return this.request(url, "DELETE", params, options);
+      return this.request(url, 'DELETE', params, options);
     }
   }
-
+  
   const httpRequest = new HttpRequest();
   export default httpRequest;
+  
