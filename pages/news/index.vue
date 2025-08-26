@@ -54,7 +54,12 @@ function getArticleList() {
 }
 
 const { getTdk } = useSystemApi();
-const { data: tdk } = await useAsyncData('tdk', () => getTdk({ module_type: '资讯' }))
+
+const { data: tdk } = await useAsyncData(
+  'tdk-news',
+  () => getTdk({ module_type: '资讯' }),
+  { server: true }
+)
 
 useHead(() => ({
   title: tdk.value?.title || '',

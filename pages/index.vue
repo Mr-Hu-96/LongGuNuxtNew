@@ -33,7 +33,7 @@
               {{ item }}
             </a-button>
             <a-select
-            v-if="isClient"
+              v-if="isClient"
               v-model:value="leftCurrentDate"
               class="w-[115px] !shadow-none !border-none bg-transparent"
               :dropdown-style="{ boxShadow: 'none' }"
@@ -154,7 +154,7 @@
               {{ item }}
             </a-button>
             <a-select
-            v-if="isClient"
+              v-if="isClient"
               v-model:value="rightCurrentDate"
               class="w-[115px] !shadow-none !border-none bg-transparent"
               :dropdown-style="{ boxShadow: 'none' }"
@@ -290,7 +290,7 @@ import { ref, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { LockOutlined } from "@ant-design/icons-vue";
 import { useUserStore } from "~/stores";
-import { useSystemApi,useStockApi } from "~/api";
+import { useSystemApi, useStockApi } from "~/api";
 
 import { formatTimestamp } from "~/utils/date";
 import type { SelectProps } from "ant-design-vue";
@@ -404,7 +404,7 @@ watch(
   }
 );
 const { getTdk } = useSystemApi();
-const { data: tdk } = await useAsyncData(() => getTdk({ module_type: '首页' }))
+const { data: tdk } = await useAsyncData(() => getTdk({ module_type: '首页' }), { server: true })
 
 useHead(() => ({
   title: tdk.value?.title || '',

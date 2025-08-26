@@ -15,7 +15,6 @@ const route = useRoute();
 const router = useRouter();
 
 const article_id = route.params.article_id as string;
-const articleData = ref<SaveArticle>({} as SaveArticle);
 const userArticleList = ref<SaveArticle[]>([]);
 watch(
   () => route.params,
@@ -25,16 +24,18 @@ watch(
 );
 const { getArticleInfo, getUserArticle } = useArticleApi();
 getData(article_id);
-const { data: tdk } = await useAsyncData('article'+article_id,() => getArticleInfo({ article_id }))
-articleData.value = tdk.value as SaveArticle;
-useHead(() => ({
-  title: tdk.value?.title || '',
+const { data: articleData } = await useAsyncData(
+  () => getArticleInfo({ article_id }),
+  { server: true }
+);
+useHead({
+  title: articleData.value.title || "默认标题1",
   meta: [
-    { name: 'description', content: tdk.value?.abstract || '' },
+    { name: "description", content: articleData.value.abstract || "默认描述2" },
+    { name: "keywords", content: articleData.value.keywords || "默认关键词3" },
   ],
-}))
+});
 function getData(article_id: string) {
-
   getUserArticle({ article_id }).then((res) => {
     if (res) {
       userArticleList.value = res;
@@ -102,22 +103,14 @@ function getData(article_id: string) {
         <div
           v-if="articleData.prev"
           class="cursor-pointer left_or_right_button"
-          @click="
-            router.push(
-              '/consultDetail/' + articleData.prev?.article_id
-            )
-          "
+          @click="router.push('/consultDetail/' + articleData.prev?.article_id)"
         >
           上一篇：{{ articleData.prev?.title }}
         </div>
         <div
           v-if="articleData.next"
           class="cursor-pointer left_or_right_button"
-          @click="
-            router.push(
-              '/consultDetail/' + articleData.next?.article_id
-            )
-          "
+          @click="router.push('/consultDetail/' + articleData.next?.article_id)"
         >
           下一篇：{{ articleData.next?.title }}
         </div>
