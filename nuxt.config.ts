@@ -41,6 +41,26 @@ export default defineNuxtConfig({
     '~/plugins/axios.client.ts',
     '~/plugins/wangeditor.client.ts',
   ],
+  app: {
+    head: {
+      script: [
+        {
+          type: 'text/javascript',
+          innerHTML: `(function () {
+          const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+          const host = location.hostname;
+          if (isMobile) {
+            if (host.startsWith('m.')) return;
+            let newHost = host.replace(/^www\\./, '');
+            newHost = 'm.' + newHost;
+            const newUrl = location.protocol + '//' + newHost + location.pathname + location.search + location.hash;
+            location.replace(newUrl);
+          }
+        })();` as any
+        }
+      ]
+    }
+  },
   hooks: {
     'pages:extend'(pages) {
       pages.push({
