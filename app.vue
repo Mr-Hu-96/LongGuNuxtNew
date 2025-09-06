@@ -107,11 +107,8 @@ function onLogout() {
   authStore.logout();
 }
 
-function handleEnterPressed(){
-  console.log(122);
-  
-  // searchValue
-  // router.push('/search')
+function handleEnterPressed() {
+  router.push("/search");
 }
 const logoPath = "/images/header/logo2x.png";
 const showArticle = ref(false);
@@ -201,7 +198,7 @@ const showArticle = ref(false);
       <a-layout-footer>
         <div class="text-sm text-white bg-gray-100">
           <!-- 顶部友情链接 -->
-          <div class="mb-1 bg-white">
+          <!-- <div class="mb-1 bg-white">
             <div class="flex items-center friendship-box">
               <div class="friendship">友情链接</div>
               <a
@@ -213,13 +210,13 @@ const showArticle = ref(false);
                 {{ link }}
               </a>
             </div>
-          </div>
+          </div> -->
 
           <!-- 中间内容 -->
           <div class="flex center-box">
             <!-- 左侧LOGO -->
             <div class="flex-1 logo">
-              <img :src="logoPath" alt="" srcset="" />
+              <img src="/images/header/logo2x.png" alt="" srcset="" />
             </div>
             <!-- 其他栏目 -->
 
@@ -227,19 +224,33 @@ const showArticle = ref(false);
               <h3
                 class="mb-4 font-semibold"
                 style="font-weight: bold; font-size: 16px"
-                
               >
                 加入我们
               </h3>
               <ul class="space-y-1">
                 <li class="pb-1">
-                  <a href="#" class="hover:underline" @click="router.push('/about')">关于我们</a>
+                  <a
+                   
+                    class="hover:underline"
+                    @click="router.push('/about?type=关于我们')"
+                    >关于我们</a
+                  >
                 </li>
                 <li class="pb-1">
-                  <a href="#" class="hover:underline" @click="router.push('/about')">联系我们</a>
+                  <a
+                   
+                    class="hover:underline"
+                    @click="router.push('/about?type=联系我们')"
+                    >联系我们</a
+                  >
                 </li>
                 <li class="pb-1">
-                  <a href="#" class="hover:underline" @click="router.push('/vip')">会员说明</a>
+                  <a
+                   
+                    class="hover:underline"
+                    @click="router.push('/about?type=会员说明')"
+                    >会员说明</a
+                  >
                 </li>
               </ul>
             </div>
@@ -252,10 +263,10 @@ const showArticle = ref(false);
               </h3>
               <ul class="space-y-1">
                 <li class="pb-1">
-                  <a href="#" class="hover:underline">常见问题</a>
+                  <a  @click="router.push('/about?type=常见问题')" class="hover:underline">常见问题</a>
                 </li>
                 <li class="pb-1">
-                  <a href="#" class="hover:underline">使用帮助</a>
+                  <a @click="router.push('/about?type=使用帮助')" class="hover:underline">使用帮助</a>
                 </li>
               </ul>
             </div>
@@ -276,14 +287,19 @@ const showArticle = ref(false);
                 关于我们
               </h3>
               <p class="text-xs leading-5 text-gray-400">
-                关于我们关于我们关于我们关于我们关于我们关于我们关于我们关于我们关于我们关于我们关于我们关于我们关于我们。
+                复盘网（longgu.com）是一个专注于短线炒股的数据分析专业复盘网。
+              </p>
+              <p class="text-xs text-gray-400">
+                免责声明：本站所有内容均来源于互联网，仅作分享学习。若发现本站无意侵犯了你的版权，请联系删除！
               </p>
             </div>
           </div>
 
           <!-- 底部版权信息 -->
           <div class="py-2 text-center text-gray-400 bg-gray-900">
-            备案信息备案信息备案信息备案信息备案信息备案信息备案信息备案信息备案信息备案信息备案信息备案信息
+            <a href="https://beian.miit.gov.cn/" target="_blank">
+              苏ICP备18052019号-12
+            </a>
           </div>
         </div>
       </a-layout-footer>

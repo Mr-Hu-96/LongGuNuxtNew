@@ -5,14 +5,16 @@ import { formatTimestamp } from "~/utils/date";
 import { useStockApi } from "~/api";
 import type { StockInfoParams } from "~/api";
 const route = useRoute();
-const code = route.query.code as string;
-if (code) {
+let code = route.params.code as string;
+console.log(code);
+onMounted(() => {
   getData();
-  getNewsList();
+  getNewsListFn();
   getHistroyLimit();
-}
+});
 
 const stockInfo = ref<StockInfoParams>({} as StockInfoParams);
+const { getByCode, getNewsList, histroyLimitUp } = useStockApi();
 function getData() {
   getByCode({ code }).then((res) => {
     stockInfo.value = res;
@@ -26,33 +28,33 @@ const dict = reactive({
 });
 
 const newsList = ref<any>([]);
-function getNewsList() {
-  getNewsListApi({ code }).then((res) => {
+function getNewsListFn() {
+  getNewsList({ code }).then((res) => {
     newsList.value = res.list;
   });
 }
 
 const histroyLimit = ref<any>([]);
 function getHistroyLimit() {
-  histroyLimitUpApi({ code }).then((res) => {
+  histroyLimitUp({ code }).then((res) => {
     histroyLimit.value = res.list;
   });
 }
 
 function formatNumber(value: number): string {
-    if (value < 10000) {
-        return `${value}元`;
-    } else if (value < 100000000) {
-        return `${(value / 10000).toFixed(2)}万`;
-    } else {
-        return `${(value / 100000000).toFixed(2)}亿`;
-    }
+  if (value < 10000) {
+    return `${value}元`;
+  } else if (value < 100000000) {
+    return `${(value / 10000).toFixed(2)}万`;
+  } else {
+    return `${(value / 100000000).toFixed(2)}亿`;
+  }
 }
 </script>
 
 <template>
   <div class="py-2">
-    <div class="flex flex-row bg-white" style="padding: 20px; height: 100px">
+    <div class="flex flex-row bg-white" style="padding: 20px;">
       <div style="width: 700px; display: flex; flex-direction: column">
         <div style="font-size: 150%; font-weight: bold">
           {{ stockInfo.name }}[{{ stockInfo.code }}]
@@ -100,13 +102,16 @@ function formatNumber(value: number): string {
         <div style="display: flex; flex-direction: column">
           <div>市盈率: {{ stockInfo.increase }}</div>
           <div style="margin-top: 20px">
-            成交额: <span style="color: #ff6823">{{ formatNumber(stockInfo.amount) }}</span>
+            成交额:
+            <span style="color: #ff6823">{{
+              formatNumber(stockInfo.amount)
+            }}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="bg-white mt-2">
+    <div class="mt-2 bg-white">
       <div class="p-4">
         <a-tabs v-model:activeKey="dict.data.table_index" size="large">
           <a-tab-pane key="1" tab="基本信息">
@@ -114,26 +119,42 @@ function formatNumber(value: number): string {
             <div
               style="display: flex; flex-direction: row; margin-bottom: 40px"
             >
-              <div style="font-weight: bold;width: 140px;">公司信息（同花顺）</div>
-              <div style="color: #666666" class="flex-1">{{ stockInfo.company_info }}</div>
+              <div style="font-weight: bold; width: 140px">
+                公司信息（同花顺）
+              </div>
+              <div style="color: #666666" class="flex-1">
+                {{ stockInfo.company_info }}
+              </div>
             </div>
             <div
               style="display: flex; flex-direction: row; margin-bottom: 40px"
             >
-              <div style="font-weight: bold; width: 140px;">涨停逻辑（开盘了）</div>
-              <div style="color: #666666" class="flex-1">{{ stockInfo.kpl_logic }}</div>
+              <div style="font-weight: bold; width: 140px">
+                涨停逻辑（开盘了）
+              </div>
+              <div style="color: #666666" class="flex-1">
+                {{ stockInfo.kpl_logic }}
+              </div>
             </div>
             <div
               style="display: flex; flex-direction: row; margin-bottom: 40px"
             >
-              <div style="font-weight: bold; width: 140px;">涨停逻辑（选股宝）</div>
-              <div style="color: #666666" class="flex-1">{{ stockInfo.xgb_logic }}</div>
+              <div style="font-weight: bold; width: 140px">
+                涨停逻辑（选股宝）
+              </div>
+              <div style="color: #666666" class="flex-1">
+                {{ stockInfo.xgb_logic }}
+              </div>
             </div>
             <div
               style="display: flex; flex-direction: row; margin-bottom: 40px"
             >
-              <div style="font-weight: bold; width: 140px;">涨停逻辑（财联社）</div>
-              <div style="color: #666666" class="flex-1">{{ stockInfo.cls_logic }}</div>
+              <div style="font-weight: bold; width: 140px">
+                涨停逻辑（财联社）
+              </div>
+              <div style="color: #666666" class="flex-1">
+                {{ stockInfo.cls_logic }}
+              </div>
             </div>
           </a-tab-pane>
 
@@ -147,7 +168,7 @@ function formatNumber(value: number): string {
                 >
                   <div style="font-weight: bold">{{ item.sclt }}</div>
                   <div style="margin-left: 5px; color: #666666">
-                    {{item.reason}}
+                    {{ item.reason }}
                   </div>
                 </div>
               </a-timeline-item>
@@ -157,7 +178,9 @@ function formatNumber(value: number): string {
             <div style="margin-top: 20px"></div>
             <a-timeline>
               <a-timeline-item v-for="item in newsList">
-                <div style="font-size: 120%; color: #5f90ea">{{ formatTimestamp(item.createtime) }}</div>
+                <div style="font-size: 120%; color: #5f90ea">
+                  {{ formatTimestamp(item.createtime) }}
+                </div>
                 <div
                   style="
                     display: flex;

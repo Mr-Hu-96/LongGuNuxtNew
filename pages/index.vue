@@ -101,7 +101,7 @@
                     <div
                       v-if="i > 0 || userInfo?.vip_info?.level"
                       class="rounded px-3 py-2 min-w-[110px] text-m shadow-sm border border-[#E8ECF5] cursor-pointer"
-                      @click="router.push('stock/detail?code=' + item.code)"
+                      @click="router.push('/stockDetail/' + item.code)"
                     >
                       <div class="font-medium text-[#888888] h-[20px]">
                         {{ item.m_days_n_boards }}
@@ -219,7 +219,7 @@
                     <div
                       v-if="i > 0 || userInfo?.vip_info?.level"
                       class="rounded px-3 py-2 min-w-[110px] text-m shadow-sm border border-[#E8ECF5] cursor-pointer"
-                      @click="router.push('stock/detail?code=' + item.code)"
+                      @click="router.push('/stockDetail/' + item.code)"
                     >
                       <div class="font-medium text-[#888888] h-[20px]">
                         {{ item.m_days_n_boards }}

@@ -89,7 +89,7 @@ function updateRemark(code: number, mark: string) {
         <template v-if="column.dataIndex === 'name'">
           <span
             class="text-blue-600 cursor-pointer"
-            @click="router.push('/stock/detail?code=' + record.code)"
+            @click="router.push('/stockDetail/' + record.code)"
             >{{ text }}</span
           >
         </template>

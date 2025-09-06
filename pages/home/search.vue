@@ -95,7 +95,7 @@ function addFavoriteFn(record: StockModelList) {
     >
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'name'">
-          <span class="cursor-pointer text-blue-600" @click="router.push('/stock/detail?code=' + record.code)">{{ text }}</span>
+          <span class="text-blue-600 cursor-pointer" @click="router.push('/stockDetail/' + record.code)">{{ text }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'optional'">
           <div

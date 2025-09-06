@@ -8,7 +8,8 @@ import { formatTimestamp } from "~/utils/date";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const userStore = useUserStore();
-const domain = window.location.origin;
+const url = useRequestURL(); // SSR 阶段也有值
+const domain = url.origin;
 
 const invitationUrl = computed(() => {
   return domain + "?invite_code=" + userStore.userInfo?.id;
@@ -29,6 +30,7 @@ const tableColumns = [
     dataIndex: "createtime",
   },
 ];
+const {getInviteList} = useUserApi();
 getInviteList({ page: 1, page_size: 5 }).then((res) => {
   tableList.value = res.data.map((item) => {
     return {

@@ -49,7 +49,7 @@ getRegulatoryList(queryParams).then((res) => {
               :headStyle="{ textAlign: 'center' }"
               :bodyStyle="{ textAlign: 'center' }"
               class="cursor-pointer"
-              @click="router.push('stock/detail?code=' + item.code)"
+              @click="router.push('/stockDetail/' + item.code)"
             >
               <div>{{ item.code }}</div>
             </a-card>
@@ -76,7 +76,7 @@ getRegulatoryList(queryParams).then((res) => {
               :headStyle="{ textAlign: 'center' }"
               :bodyStyle="{ textAlign: 'center' }"
               class="cursor-pointer"
-              @click="router.push('stock/detail?code=' + item.code)"
+              @click="router.push('/stockDetail/' + item.code)"
             >
               <div>{{ item.code }}</div>
             </a-card>
@@ -103,7 +103,7 @@ getRegulatoryList(queryParams).then((res) => {
               :headStyle="{ textAlign: 'center' }"
               :bodyStyle="{ textAlign: 'center' }"
               class="cursor-pointer"
-              @click="router.push('stock/detail?code=' + item.code)"
+              @click="router.push('/stockDetail/' + item.code)"
             >
               <div>{{ item.code }}</div>
             </a-card>
@@ -129,7 +129,7 @@ getRegulatoryList(queryParams).then((res) => {
               :headStyle="{ textAlign: 'center' }"
               :bodyStyle="{ textAlign: 'center' }"
               class="cursor-pointer"
-              @click="router.push('stock/detail?code=' + item.code)"
+              @click="router.push('/stockDetail/' + item.code)"
             >
               <div>{{ item.code }}</div>
             </a-card>

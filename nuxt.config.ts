@@ -89,8 +89,8 @@ export default defineNuxtConfig({
         meta: { title: '搜索' }
       })
       pages.push({
-        path: '/stock',
-        file: '~/pages/stock/detail.vue',
+        path: '/stockDetail/:code',
+        file: fileURLToPath(new URL('./pages/stock/detail.vue', import.meta.url)),
         meta: { title: '股票详情' }
       })
       pages.push({
