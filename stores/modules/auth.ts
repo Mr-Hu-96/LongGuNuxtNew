@@ -46,10 +46,10 @@ export const useAuthStore = defineStore('auth', () => {
 
                 userInfo = fetchUserInfoResult;
 
-                userStore.setUserInfo(userInfo);
 
 
                 if (accessStore.loginExpired) {
+                    console.log('setLoginExpired5');
                     accessStore.setLoginExpired(false);
                 } else {
                     onSuccess
@@ -78,7 +78,10 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const authApi = useAuthApi();
             await authApi.logout();
+            userStore.setUserInfo(null)
+            accessStore.setAccessToken(null);
         } catch {
+            accessStore.setAccessToken(null);
             // 不做任何处理
         }
         // resetAllStores();

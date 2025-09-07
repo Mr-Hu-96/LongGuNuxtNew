@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import type { MenuProps } from "ant-design-vue";
-import { useUserApi } from "~/api"
-import { useAccessStore,useUserStore } from "~/stores"
+import { useUserApi } from "~/api";
+import { useAccessStore, useUserStore } from "~/stores";
 import Article from "./components/Article.vue";
 import LoginModal from "./components/LoginModal.vue";
-const userApi = useUserApi()
+import { set } from "@vueuse/core";
+const userApi = useUserApi();
 const current = ref<string[]>(["mail"]);
 const items = ref<MenuProps["items"]>([
   {
@@ -36,8 +37,8 @@ const links = [
 ];
 // 不要在应用启动时自动登录或请求用户信息
 // 当检测到已存在的 token 时再请求用户信息
-const accessStore = useAccessStore()
-const userStore = useUserStore()
+const accessStore = useAccessStore();
+const userStore = useUserStore();
 
 const searchValue = ref("");
 
@@ -71,6 +72,9 @@ const themeConfig = {
   },
 };
 const onLogin = () => {
+  console.log("登录成功 app 74");
+  console.log("setLoginExpired1");
+
   accessStore.setLoginExpired(true);
 };
 
@@ -78,15 +82,16 @@ const accessToken = computed(() => {
   return accessStore.accessToken;
 });
 
-const isClient = ref(false)
+const isClient = ref(false);
 onMounted(() => {
-  isClient.value = true
-})
+  isClient.value = true;
+});
 
-const showLogin = computed(() => {
-  // 只有客户端渲染并且没有token才显示登录按钮
-  return isClient.value && !accessToken.value
-})
+// const showLogin = computed(() => {
+//   // 只有客户端渲染并且没有token才显示登录按钮
+//   return isClient.value && !accessToken.value
+// })
+const showLogin = computed(() => accessStore.loginExpired);
 
 const showUserUI = computed(() => isClient.value && !!accessToken.value);
 
@@ -94,6 +99,7 @@ watch(
   () => accessToken.value,
   (newToken) => {
     if (newToken) {
+      console.log("登录成功 getUserInfo");
       userStore.getUserInfo();
     }
   },
@@ -110,15 +116,19 @@ function onLogout() {
 function handleEnterPressed() {
   router.push("/search");
 }
-const logoPath = "/images/header/logo2x.png";
 const showArticle = ref(false);
 </script>
 <template>
   <a-config-provider :theme="themeConfig">
-    <a-layout style="min-height: 100vh;">
+    <a-layout style="min-height: 100vh">
       <a-layout-header
         class="header"
-        :style="{ position: 'fixed', zIndex: 1, width: '100%',minWidth:'1530px'}"
+        :style="{
+          position: 'fixed',
+          zIndex: 1,
+          width: '100%',
+          minWidth: '1530px',
+        }"
       >
         <img src="/images/header/logo.png" alt="" srcset="" />
         <a-menu
@@ -128,14 +138,22 @@ const showArticle = ref(false);
           @click="(e: any) => router.push(e.key)"
         />
         <div class="right">
-          <div @click="handleEnterPressed" class="flex items-center cursor-pointer">
-            <a-input v-model:value="searchValue" class="pointer-events-none" readonly placeholder="请输入关键词搜索">
-            <template #prefix>
-              <search-outlined :style="{ fontSize: '20px', color: '#FFF' }" />
-            </template>
-          </a-input>
+          <div
+            @click="handleEnterPressed"
+            class="flex items-center cursor-pointer"
+          >
+            <a-input
+              v-model:value="searchValue"
+              class="pointer-events-none"
+              readonly
+              placeholder="请输入关键词搜索"
+            >
+              <template #prefix>
+                <search-outlined :style="{ fontSize: '20px', color: '#FFF' }" />
+              </template>
+            </a-input>
           </div>
-          
+
           <img
             class="mx-4 cursor-pointer"
             src="/images/header/消息.png"
@@ -230,7 +248,6 @@ const showArticle = ref(false);
               <ul class="space-y-1">
                 <li class="pb-1">
                   <a
-                   
                     class="hover:underline"
                     @click="router.push('/about?type=关于我们')"
                     >关于我们</a
@@ -238,7 +255,6 @@ const showArticle = ref(false);
                 </li>
                 <li class="pb-1">
                   <a
-                   
                     class="hover:underline"
                     @click="router.push('/about?type=联系我们')"
                     >联系我们</a
@@ -246,7 +262,6 @@ const showArticle = ref(false);
                 </li>
                 <li class="pb-1">
                   <a
-                   
                     class="hover:underline"
                     @click="router.push('/about?type=会员说明')"
                     >会员说明</a
@@ -263,10 +278,18 @@ const showArticle = ref(false);
               </h3>
               <ul class="space-y-1">
                 <li class="pb-1">
-                  <a  @click="router.push('/about?type=常见问题')" class="hover:underline">常见问题</a>
+                  <a
+                    @click="router.push('/about?type=常见问题')"
+                    class="hover:underline"
+                    >常见问题</a
+                  >
                 </li>
                 <li class="pb-1">
-                  <a @click="router.push('/about?type=使用帮助')" class="hover:underline">使用帮助</a>
+                  <a
+                    @click="router.push('/about?type=使用帮助')"
+                    class="hover:underline"
+                    >使用帮助</a
+                  >
                 </li>
               </ul>
             </div>

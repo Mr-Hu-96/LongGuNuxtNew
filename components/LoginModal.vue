@@ -46,6 +46,8 @@ const submit = () => {
     authStore.fetchUserInfo()
     if (res.userinfo?.token) {
       accessStore.setAccessToken(res.userinfo?.token);
+      console.log('setLoginExpired2');
+  
       accessStore.setLoginExpired(false);
 
       bindInvitedFn().then(() => {
@@ -71,12 +73,7 @@ const sceneId = ref(0);
 
 const accessStore = useAccessStore();
 const scanTimer = ref<number | null>(null);
-const model = computed({
-  get: () => accessStore.loginExpired,
-  set: (value) => {
-    accessStore.loginExpired = value;
-  },
-});
+const model = ref(false);
 
 function getTicketFn() {
   const authApi = useAuthApi();
@@ -127,16 +124,20 @@ function setScan() {
 watch(
   () => accessStore.loginExpired,
   (newVal) => {
+    console.log("登录状态改变:", newVal);
+    model.value = newVal;
     if (newVal === false) {
       clearData();
+      if (scanTimer.value !== null) {
+        clearInterval(scanTimer.value);
+        scanTimer.value = null;
+      }
     } else {
       getTicketFn();
       setScan();
     }
   },
-  {
-    immediate: true,
-  }
+  { immediate: true,deep:true }
 );
 
 function bindInvitedFn() {
