@@ -87,11 +87,12 @@ onMounted(() => {
   isClient.value = true;
 });
 
-// const showLogin = computed(() => {
-//   // 只有客户端渲染并且没有token才显示登录按钮
-//   return isClient.value && !accessToken.value
-// })
-const showLogin = computed(() => accessStore.loginExpired);
+const showLogin = computed(() => {
+  // 只有客户端渲染并且没有token才显示登录按钮
+  console.log("showLogin", accessStore.loginExpired);
+  return isClient.value && !accessToken.value && accessStore.loginExpired
+})
+// const showLogin = computed(() => accessStore.loginExpired);
 
 const showUserUI = computed(() => isClient.value && !!accessToken.value);
 
@@ -183,7 +184,7 @@ const showArticle = ref(false);
               会员中心
             </a-button>
           </div>
-          <div class="mr-2 vip-btn" v-if="showLogin">
+          <div class="mr-2 vip-btn" v-if="!showUserUI">
             <a-button ghost @click="onLogin"> 登录/注册 </a-button>
           </div>
           <a-avatar v-if="showUserUI" :src="userStore.userInfo?.avatar" />

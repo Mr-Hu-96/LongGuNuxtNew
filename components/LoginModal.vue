@@ -6,6 +6,7 @@ import {
   getTicketApi
 } from "~/api";
 import { useAccessStore, useUserStore,useAuthStore } from "~/stores";
+const router = useRouter();
 const phone = ref("");
 const code = ref("");
 const agree = ref(false);
@@ -53,6 +54,7 @@ const submit = () => {
       bindInvitedFn().then(() => {
         setTimeout(() => {
           // location.reload();
+          router.go(0);
           clearData();
         }, 0);
         
@@ -73,7 +75,12 @@ const sceneId = ref(0);
 
 const accessStore = useAccessStore();
 const scanTimer = ref<number | null>(null);
-const model = ref(false);
+const model = computed({
+  get: () => accessStore.loginExpired,
+  set: (value) => {
+    accessStore.loginExpired = value;
+  },
+});
 
 function getTicketFn() {
   const authApi = useAuthApi();
@@ -125,7 +132,7 @@ watch(
   () => accessStore.loginExpired,
   (newVal) => {
     console.log("登录状态改变:", newVal);
-    model.value = newVal;
+    // model.value = newVal;
     if (newVal === false) {
       clearData();
       if (scanTimer.value !== null) {
