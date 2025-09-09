@@ -85,7 +85,9 @@
                 <div class="flex flex-wrap gap-3">
                   <a-tooltip v-for="(item, i) in group.list" :key="item.code">
                     <template #title
-                      ><p>
+                      >
+                      <div v-if="i > 0 || userInfo?.vip_info?.level">
+                        <p>
                         {{
                           formatTimestamp(item.limit_up_time, "HH:mm") +
                           "【" +
@@ -97,6 +99,8 @@
                         }}
                       </p>
                       <div>{{ item.stock_reason }}</div>
+                      </div>
+                      <div v-else>请先开通会员</div>
                     </template>
                     <div
                       v-if="i > 0 || userInfo?.vip_info?.level"
@@ -203,7 +207,9 @@
                 <div class="flex flex-wrap gap-3">
                   <a-tooltip v-for="(item, i) in group.list" :key="item.code">
                     <template #title
-                      ><p>
+                      >
+                      <div v-if="i > 0 || userInfo?.vip_info?.level">
+                        <p>
                         {{
                           formatTimestamp(item.limit_up_time, "HH:mm") +
                           "【" +
@@ -215,6 +221,8 @@
                         }}
                       </p>
                       <div>{{ item.stock_reason }}</div>
+                      </div>
+                      <div v-else>请先开通会员</div>
                     </template>
                     <div
                       v-if="i > 0 || userInfo?.vip_info?.level"
