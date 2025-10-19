@@ -20,7 +20,7 @@ const flowList = ref<BasicUserInfo[]>([]);
 const vipInfo = ref({});
 
 const { getFlowList, getUserList, createOrder } = useUserApi();
-
+useUserStore().getUserInfo()
 getFlowList().then((res) => {
   if (res) {
     flowList.value = res;

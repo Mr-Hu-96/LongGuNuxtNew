@@ -13,7 +13,7 @@
           <span class="text-lg font-semibold">{{ userInfo?.nickname }}</span>
           <img v-if="userInfo?.vip_info?.vip_type" style="width: 100px;" :src="'/images/user/vip'+userInfo?.vip_info?.vip_type+'.png'" alt="vip" class="px-2 py-1" />
 
-          <span class="text-sm text-gray-500"
+          <span class="ml-2 text-sm text-gray-500"
             >到期时间：{{
               formatTimestamp(userInfo?.vip_info?.expiretime)
             }}</span
@@ -313,6 +313,7 @@ const userStore = useUserStore();
 const { getArticleList: getArticleListApi, saveArticle: saveArticleApi, deleteArticle: deleteArticleApi, getArticleInfo: getArticleInfoApi, getArticleCategoryList: getArticleCategoryListApi } = useArticleApi();
 const { saveUserInfo: saveUserInfoApi } = useUserApi();
 const { uploadFile } = useSystemApi();
+userStore.getUserInfo()
 const userInfo = computed(() => {
   return (userStore.userInfo as BasicUserInfo) || {};
 });

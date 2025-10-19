@@ -24,11 +24,11 @@ export const useUserStore = defineStore('core-user', {
             this.inviteCode = inviteCode
         },
         async getUserInfo() {
-            if (this.userInfo === null) {
+            // if (this.userInfo === null) {
                 const userApi = useUserApi()
                 const res = await userApi.getUserInfo()
                 this.setUserInfo(res)
-            }
+            // }
             return this.userInfo;
         }
 
