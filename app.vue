@@ -5,7 +5,7 @@ import { useUserApi } from "~/api";
 import { useAccessStore, useUserStore } from "~/stores";
 import Article from "./components/Article.vue";
 import LoginModal from "./components/LoginModal.vue";
-import { set } from "@vueuse/core";
+
 const userApi = useUserApi();
 const current = ref<string[]>(["mail"]);
 const items = ref<MenuProps["items"]>([
@@ -322,7 +322,7 @@ const showArticle = ref(false);
           <!-- 底部版权信息 -->
           <div class="py-2 text-center text-gray-400 bg-gray-900">
             <a href="https://beian.miit.gov.cn/" target="_blank">
-              苏ICP备18052019号-12
+              Copyright © 2025 苏州热猫网络传媒有限公司 版权所有   苏ICP备18052019号-12
             </a>
           </div>
         </div>
