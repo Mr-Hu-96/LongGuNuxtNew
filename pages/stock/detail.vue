@@ -4,6 +4,9 @@ import { useRoute } from "vue-router";
 import { formatTimestamp } from "~/utils/date";
 import { useStockApi } from "~/api";
 import type { StockInfoParams } from "~/api";
+const chartRef = ref<HTMLDivElement | null>(null);
+const { $echarts } = useNuxtApp();
+
 const route = useRoute();
 let code = route.params.code as string;
 console.log(code);
@@ -11,10 +14,237 @@ onMounted(() => {
   getData();
   getNewsListFn();
   getHistroyLimit();
-});
+  getKlineData({ code: '000001' }).then((res) => { 
+    function generateKlineData(baseData, count = 1000) {
+      [ "prod_name", "update_time", "last_px", "px_change", "px_change_rate", "preclose_px", "open_px", "high_px", "low_px", "amplitude", "turnover_ratio", "turnover_volume", "date", "minute" ]
+  const [name, dateStr, close, change, pctChange, open, prevClose, high, low, , turnover, vol, date, ts] = baseData;
 
+  const result = [];
+  let prevClosePrice = close;
+
+  for (let i = 0; i < count; i++) {
+    const dateObj = new Date(new Date(dateStr).getTime() - i * 24 * 60 * 60 * 1000);
+    const dateText = dateObj.toISOString().split("T")[0]; // yyyy-mm-dd
+
+    // 模拟波动范围
+    const changePct = (Math.random() - 0.5) * 4; // ±2% 波动
+    const openPrice = +(prevClosePrice * (1 + (Math.random() - 0.5) * 0.01)).toFixed(2);
+    const closePrice = +(openPrice * (1 + changePct / 100)).toFixed(2);
+    const highPrice = +(Math.max(openPrice, closePrice) * (1 + Math.random() * 0.01)).toFixed(2);
+    const lowPrice = +(Math.min(openPrice, closePrice) * (1 - Math.random() * 0.01)).toFixed(2);
+
+    const changePrice = +(closePrice - prevClosePrice).toFixed(2);
+    const pct = +((changePrice / prevClosePrice) * 100).toFixed(2);
+
+    const volume = Math.floor(Math.random() * 2_000_000 + 500_000);
+    const turnoverRate = +(Math.random() * 1.5).toFixed(2);
+
+    result.unshift([
+      name,
+      `${dateText} 15:00:00`,
+      closePrice,
+      changePrice,
+      pct,
+      openPrice,
+      prevClosePrice,
+      highPrice,
+      lowPrice,
+      0,
+      turnoverRate,
+      volume,
+      dateText.replace(/-/g, ""),
+      `${dateText.replace(/-/g, "")}${String(900 + i).padStart(4, "0")}`,
+    ]);
+
+    prevClosePrice = closePrice;
+  }
+
+  return result;
+}
+
+// 示例
+const base = ["平安银行", "2025-10-20 23:22:52", 11.42, 0.02, 0.18, 11.4, 11.41, 11.45, 11.27, 0, 0.49, 952641, "20251020", "202510201728"];
+
+const data = generateKlineData(base, 1000);
+      setKLineChart(data);
+  });
+
+});
+function setKLineChart(res) {
+  if (!chartRef.value) return;
+  const chart = $echarts.init(chartRef.value);
+  const upColor = "#ec0000"; // 涨：红色
+  const downColor = "#00da3c"; // 跌：绿色
+
+  // 模拟的股票数据：[日期, 开盘价, 收盘价, 最低价, 最高价, 成交量]
+  const rawData = res.map(item=>{
+    return [
+      item.date,
+      item.open,
+      item.close,
+      item.low,
+      item.high,
+      item.volume,
+    ];
+  });
+
+  function splitData(rawData) {
+    const categoryData = [];
+    const values = [];
+    const volumes = [];
+    for (let i = 0; i < rawData.length; i++) {
+      categoryData.push(rawData[i][0]);
+      values.push(rawData[i].slice(1, 5));
+      // 这里改为：收盘价 > 开盘价 为 涨（1），否则为 跌（-1）
+      volumes.push([i, rawData[i][5], rawData[i][2] > rawData[i][1] ? 1 : -1]);
+    }
+    return { categoryData, values, volumes };
+  }
+
+  function calculateMA(dayCount, data) {
+    const result = [];
+    for (let i = 0; i < data.values.length; i++) {
+      if (i < dayCount) {
+        result.push("-");
+        continue;
+      }
+      let sum = 0;
+      for (let j = 0; j < dayCount; j++) {
+        sum += data.values[i - j][1];
+      }
+      result.push((sum / dayCount).toFixed(2));
+    }
+    return result;
+  }
+
+  const data = splitData(rawData);
+
+  const option = {
+    title: {
+      text: "K线 + 成交量（红涨绿跌）",
+      left: 0,
+    },
+    legend: {
+      data: ["K线", "MA5", "MA10", "成交量"],
+      bottom: 5,
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "cross",
+      },
+    },
+    axisPointer: {
+      link: [{ xAxisIndex: "all" }],
+    },
+    grid: [
+      {
+        left: "10%",
+        right: "8%",
+        height: "60%",
+      },
+      {
+        left: "10%",
+        right: "8%",
+        top: "70%",
+        height: "20%",
+      },
+    ],
+    xAxis: [
+      {
+        type: "category",
+        data: data.categoryData,
+        boundaryGap: false,
+        axisLine: { onZero: false },
+        splitLine: { show: false },
+        min: "dataMin",
+        max: "dataMax",
+      },
+      {
+        type: "category",
+        gridIndex: 1,
+        data: data.categoryData,
+        boundaryGap: false,
+        axisTick: { show: false },
+        axisLabel: { show: false },
+        splitLine: { show: false },
+        min: "dataMin",
+        max: "dataMax",
+      },
+    ],
+    yAxis: [
+      {
+        scale: true,
+        splitArea: { show: true },
+      },
+      {
+        scale: true,
+        gridIndex: 1,
+        splitNumber: 2,
+        axisLabel: { show: false },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+      },
+    ],
+    dataZoom: [
+      {
+        type: "inside",
+        xAxisIndex: [0, 1],
+        start: 0,
+        end: 100,
+      }
+    ],
+    visualMap: {
+      show: false,
+      seriesIndex: 3, // 改为成交量 series 索引
+      dimension: 2,
+      pieces: [
+        { value: 1, color: upColor }, // 收盘高于开盘：红
+        { value: -1, color: downColor }, // 收盘低于开盘：绿
+      ],
+    },
+    series: [
+      {
+        name: "K线",
+        type: "candlestick",
+        data: data.values,
+        itemStyle: {
+          color: downColor,         // 跌：绿色 实心
+          color0: 'transparent',    // 涨：红色 空心
+          borderColor: downColor,   // 跌：绿色边框
+          borderColor0: upColor     // 涨：红色边框
+        },
+      },
+      {
+        name: "MA5",
+        type: "line",
+        data: calculateMA(5, data),
+        smooth: true,
+        lineStyle: { opacity: 0.5 },
+      },
+      {
+        name: "MA10",
+        type: "line",
+        data: calculateMA(10, data),
+        smooth: true,
+        lineStyle: { opacity: 0.5 },
+      },
+      {
+        name: "成交量",
+        type: "bar",
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        data: data.volumes,
+      },
+    ],
+  };
+  chart.setOption(option);
+
+  window.addEventListener("resize", () => chart.resize());
+}
 const stockInfo = ref<StockInfoParams>({} as StockInfoParams);
-const { getByCode, getNewsList, histroyLimitUp } = useStockApi();
+const { getByCode, getNewsList, histroyLimitUp, getKlineData } = useStockApi();
 function getData() {
   getByCode({ code }).then((res) => {
     stockInfo.value = res;
@@ -54,7 +284,8 @@ function formatNumber(value: number): string {
 
 <template>
   <div class="py-2">
-    <div class="flex flex-row bg-white" style="padding: 20px;">
+    <div ref="chartRef" class="bg-white chart w-full h-[400px] mb-2"></div>
+    <div class="flex flex-row bg-white" style="padding: 20px">
       <div style="width: 700px; display: flex; flex-direction: column">
         <div style="font-size: 150%; font-weight: bold">
           {{ stockInfo.name }}[{{ stockInfo.code }}]

@@ -51,6 +51,11 @@ export function useStockApi() {
      */
     histroyLimitUp: (params: { code: string }) =>
       $request.get<StockInfoParams>('/stock/histroyLimitUp', params),
+    /**
+     * 股票详情-k线图
+     */
+    getKlineData: (params: { code: string }) =>
+      $request.get<StockInfoParams>('/stock/getKlineData', params),
 
     /**
      * 获取龙板通达
