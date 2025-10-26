@@ -39,156 +39,162 @@ function formatToTimeHM(timestamp) {
   const minutes = date.getMinutes().toString().padStart(2, '0');
   return `${hours}:${minutes}`;
 }
+
+let trendTimer: NodeJS.Timeout | null = null;
 function getKlineDataFn(_code: string, periodType: string) {
+  // 如果切换周期类型，先清除旧定时器
+  if (trendTimer) {
+    clearInterval(trendTimer);
+    trendTimer = null;
+  }
   if (periodType == "min") {
-    getTrendData({ code: _code }).then((res) => {
-      const times:any = [];
+    const fetchTrend = () => {
+      getTrendData({ code: _code }).then((res) => {
+        const times: string[] = [];
+        const prices: number[] = [];
+        const avgPrices: number[] = [];
+        const volumes: number[] = [];
 
-      const prices:any = [];
-      const avgPrices:any = [];
-      const volumes:any = [];
+        const preClose = 10.2; // 昨收价（用于计算涨跌幅）
+        res.lines.forEach((item: any) => {
+          times.push(formatToTimeHM(item[0] * 1000));
+          prices.push(item[1]);
+          avgPrices.push(item[2]);
+          volumes.push(item[3]);
+        });
 
-      const preClose = 10.2; // 昨收价（用于计算涨跌幅）
-      res.lines.forEach((item:any) => {
-        times.push(formatToTimeHM(item[0]*1000))
-        prices.push(item[1])
-        avgPrices.push(item[2])
-        volumes.push(item[3])
-      });
-      
-      const option = {
-        backgroundColor: "#fff",
-
-        tooltip: {
-          trigger: "axis",
-          axisPointer: { type: "cross" },
-          formatter: (params) => {
-            const price = params[0].data;
-            const change = (((price - preClose) / preClose) * 100).toFixed(2);
-            return `
-        时间：${params[0].axisValue}<br/>
-        现价：${price}<br/>
-        均价：${params[1].data}<br/>
-        涨跌幅：<span style="color:${
-          change >= 0 ? "#ec0000" : "#00da3c"
-        }">${change}%</span>
-      `;
+        const option = {
+          backgroundColor: "#fff",
+          tooltip: {
+            trigger: "axis",
+            axisPointer: { type: "cross" },
+            formatter: (params) => {
+              const price = params[0].data;
+              const change = (((price - preClose) / preClose) * 100).toFixed(2);
+              return `
+                时间：${params[0].axisValue}<br/>
+                现价：${price}<br/>
+                均价：${params[1].data}<br/>
+                涨跌幅：<span style="color:${
+                  change >= 0 ? "#ec0000" : "#00da3c"
+                }">${change}%</span>
+              `;
+            },
           },
-        },
-        axisPointer: {
-          link: [{ xAxisIndex: "all" }],
-        },
-        grid: [
-          {
-            left: 60,
-            right: 50,
-            height: "55%",
-          },
-          {
-            left: 60,
-            right: 50,
-            top: "80%",
-            height: "16%",
-          },
-        ],
-        xAxis: [
-          {
-            type: "category",
-            data: times,
-            axisLine: { lineStyle: { color: "#aaa" } },
-            axisLabel: { color: "#555" },
-            splitLine: { show: false },
-          },
-          {
-            type: "category",
-            gridIndex: 1,
-            data: times,
-            axisLine: { lineStyle: { color: "#aaa" } },
-            axisLabel: { color: "#555" },
-            splitLine: { show: false },
-          },
-        ],
-        yAxis: [
-          {
-            type: "value",
-            scale: true,
-            splitLine: { show: false },
-            axisLabel: { color: "#666" },
-            axisLine: { show: false },
-            min: preClose * 0.9,
-            max: preClose * 1.1,
-            axisPointer: { show: true },
-            // 背景分层（±10%、±5%、0%）
-            splitArea: {
-              show: true,
-              areaStyle: {
-                color: [
-                  "#e0f7ff", // +10%区域
-                  "#f0faff", // +5%
-                  "#ffffff", // 0%
-                  "#f0fff0", // -5%
-                  "#e0ffe0", // -10%
-                ],
+          axisPointer: { link: [{ xAxisIndex: "all" }] },
+          grid: [
+            { left: 60, right: 50, height: "55%" },
+            { left: 60, right: 50, top: "80%", height: "16%" },
+          ],
+          xAxis: [
+            {
+              type: "category",
+              data: times,
+              axisLine: { lineStyle: { color: "#aaa" } },
+              axisLabel: { color: "#555" },
+              splitLine: { show: false },
+            },
+            {
+              type: "category",
+              gridIndex: 1,
+              data: times,
+              axisLine: { lineStyle: { color: "#aaa" } },
+              axisLabel: { color: "#555" },
+              splitLine: { show: false },
+            },
+          ],
+          yAxis: [
+            {
+              type: "value",
+              scale: true,
+              splitLine: { show: false },
+              axisLabel: { color: "#666" },
+              axisLine: { show: false },
+              min: preClose * 0.9,
+              max: preClose * 1.1,
+              axisPointer: { show: true },
+              splitArea: {
+                show: true,
+                areaStyle: {
+                  color: [
+                    "#e0f7ff",
+                    "#f0faff",
+                    "#ffffff",
+                    "#f0fff0",
+                    "#e0ffe0",
+                  ],
+                },
               },
             },
-          },
-          {
-            type: "value",
-            gridIndex: 1,
-            axisLabel: { show: false },
-            splitLine: { show: false },
-          },
-          // 右侧涨跌百分比刻度
-          {
-            type: "value",
-            position: "right",
-            min: -0.1,
-            max: 0.1,
-            interval: 0.05,
-            axisLabel: {
-              formatter: (val) => (val * 100).toFixed(2) + "%",
-              color: (val) =>
-                val > 0 ? "#ec0000" : val < 0 ? "#00da3c" : "#409eff",
+            {
+              type: "value",
+              gridIndex: 1,
+              axisLabel: { show: false },
+              splitLine: { show: false },
             },
-            splitLine: { show: false },
-          },
-        ],
-        series: [
-          {
-            name: "现价",
-            type: "line",
-            data: prices,
-            smooth: true,
-            showSymbol: false,
-            lineStyle: { color: "#1E90FF", width: 1.5 },
-            areaStyle: { color: "rgba(30,144,255,0.1)" },
-          },
-          {
-            name: "均价",
-            type: "line",
-            data: avgPrices,
-            smooth: true,
-            showSymbol: false,
-            lineStyle: { color: "#DAA520", width: 1 },
-          },
-          {
-            name: "成交量",
-            type: "bar",
-            xAxisIndex: 1,
-            yAxisIndex: 1,
-            barWidth: "60%",
-            itemStyle: {
-              color: (params) =>
-                prices[params.dataIndex] >= preClose ? "#ec0000" : "#00da3c",
+            {
+              type: "value",
+              position: "right",
+              min: -0.1,
+              max: 0.1,
+              interval: 0.05,
+              axisLabel: {
+                formatter: (val) => (val * 100).toFixed(2) + "%",
+                color: (val) =>
+                  val > 0 ? "#ec0000" : val < 0 ? "#00da3c" : "#409eff",
+              },
+              splitLine: { show: false },
             },
-            data: volumes,
-          },
-        ],
-      };
-      
-      chart?.setOption(option, { notMerge: true,lazyUpdate: true });
-    });
+          ],
+          series: [
+            {
+              name: "现价",
+              type: "line",
+              data: prices,
+              smooth: true,
+              showSymbol: false,
+              lineStyle: { color: "#1E90FF", width: 1.5 },
+              areaStyle: { color: "rgba(30,144,255,0.1)" },
+            },
+            {
+              name: "均价",
+              type: "line",
+              data: avgPrices,
+              smooth: true,
+              showSymbol: false,
+              lineStyle: { color: "#DAA520", width: 1 },
+            },
+            {
+              name: "成交量",
+              type: "bar",
+              xAxisIndex: 1,
+              yAxisIndex: 1,
+              barWidth: "60%",
+              itemStyle: {
+                color: (params) =>
+                  prices[params.dataIndex] >= preClose ? "#ec0000" : "#00da3c",
+              },
+              data: volumes,
+            },
+          ],
+        };
+
+        // ✅ 平滑更新数据（不闪烁）
+        chart?.setOption(option, { notMerge: false, lazyUpdate: true });
+      });
+    };
+
+    // 第一次执行
+    fetchTrend();
+
+    // ✅ 每5秒更新一次
+    trendTimer = setInterval(fetchTrend, 5000);
   } else {
+    // 非分时图清理定时器
+    if (trendTimer) {
+      clearInterval(trendTimer);
+      trendTimer = null;
+    }
     getKlineData({ code: _code, period_type: periodType }).then((res) => {
       const _data = res.candle[_code].lines.map((item) => {
         return [
