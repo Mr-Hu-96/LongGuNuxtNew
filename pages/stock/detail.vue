@@ -6,10 +6,10 @@ import { useStockApi } from "~/api";
 import type { StockInfoParams } from "~/api";
 const chartRef = ref<HTMLDivElement | null>(null);
 const { $echarts } = useNuxtApp();
-
+let chart: echarts.ECharts | null = null;
 const route = useRoute();
 let code = route.params.code as string;
-const periodType = ref("86400");
+const periodType = ref("min");
 const periodTypeList = ref([
   { label: "分时图", value: "min" },
   { label: "日K", value: "86400" },
@@ -17,50 +17,48 @@ const periodTypeList = ref([
   { label: "月K", value: "2592000" },
 ]);
 function changePeriodType(periodType: string) {
-  const _code = "603162";
-  getKlineDataFn(_code, periodType);
+  if (!chart) return;
+  chart.clear(); // 🔥 清空旧图表
+  getKlineDataFn(code, periodType);
 }
 onMounted(() => {
   getData();
   getNewsListFn();
   getHistroyLimit();
-  const _code = "603162";
-  getKlineDataFn(_code, periodType.value);
+    if (chartRef.value) {
+    chart = $echarts.init(chartRef.value);
+    window.addEventListener("resize", () => chart?.resize());
+  }
+  getKlineDataFn(code, periodType.value);
 });
 
+
+function formatToTimeHM(timestamp) {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
 function getKlineDataFn(_code: string, periodType: string) {
   if (periodType == "min") {
-    getRealTimeData({ code: _code }).then((res) => {
-      const times = [
-        "09:30",
-        "10:00",
-        "10:30",
-        "11:00",
-        "11:30",
-        "13:00",
-        "13:30",
-        "14:00",
-        "14:30",
-        "15:00",
-      ];
+    getTrendData({ code: _code }).then((res) => {
+      const times:any = [];
 
-      const prices = [
-        9.2, 10.5, 10.8, 10.7, 10.72, 10.73, 10.75, 10.78, 10.8, 10.82,
-      ];
-      const avgPrices = [
-        9.2, 10.1, 10.5, 10.6, 10.68, 10.7, 10.72, 10.74, 10.76, 10.78,
-      ];
-      const volumes = [500, 800, 1200, 1000, 900, 600, 400, 700, 500, 800];
+      const prices:any = [];
+      const avgPrices:any = [];
+      const volumes:any = [];
 
       const preClose = 10.2; // 昨收价（用于计算涨跌幅）
-
+      res.lines.forEach((item:any) => {
+        times.push(formatToTimeHM(item[0]*1000))
+        prices.push(item[1])
+        avgPrices.push(item[2])
+        volumes.push(item[3])
+      });
+      
       const option = {
         backgroundColor: "#fff",
-        title: {
-          text: "分时图示例",
-          left: "center",
-          top: 5,
-        },
+
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "cross" },
@@ -84,13 +82,13 @@ function getKlineDataFn(_code: string, periodType: string) {
           {
             left: 60,
             right: 50,
-            height: "60%",
+            height: "55%",
           },
           {
             left: 60,
             right: 50,
-            top: "72%",
-            height: "20%",
+            top: "80%",
+            height: "16%",
           },
         ],
         xAxis: [
@@ -187,9 +185,8 @@ function getKlineDataFn(_code: string, periodType: string) {
           },
         ],
       };
-      if (!chartRef.value) return;
-       const chart = $echarts.init(chartRef.value);
-       chart.setOption(option)
+      
+      chart?.setOption(option, { notMerge: true,lazyUpdate: true });
     });
   } else {
     getKlineData({ code: _code, period_type: periodType }).then((res) => {
@@ -211,8 +208,7 @@ function getKlineDataFn(_code: string, periodType: string) {
   }
 }
 function setKLineChart(res) {
-  if (!chartRef.value) return;
-  const chart = $echarts.init(chartRef.value);
+  
   const upColor = "#00da3c"; // 绿色
   const downColor = "#ec0000"; // 红色
 
@@ -251,10 +247,6 @@ function setKLineChart(res) {
   const data = splitData(rawData);
 
   const option = {
-    legend: {
-      data: ["K线", "MA5", "MA10", "成交量"],
-      bottom: 5,
-    },
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -266,14 +258,14 @@ function setKLineChart(res) {
     },
     grid: [
       {
-        left: "10%",
-        right: "8%",
+        left: "5%",
+        right: "5%",
         height: "60%",
       },
       {
-        left: "10%",
-        right: "8%",
-        top: "70%",
+        left: "5%",
+        right: "5%",
+        top: "75%",
         height: "20%",
       },
     ],
@@ -327,8 +319,8 @@ function setKLineChart(res) {
       seriesIndex: 3, // 改为成交量 series 索引
       dimension: 2,
       pieces: [
-        { value: 1, color: downColor }, 
-        { value: -1, color: upColor }, 
+        { value: 1, color: downColor },
+        { value: -1, color: upColor },
       ],
     },
     series: [
@@ -337,10 +329,10 @@ function setKLineChart(res) {
         type: "candlestick",
         data: data.values,
         itemStyle: {
-          color: 'transparent', 
-          color0: upColor, 
-          borderColor: downColor, 
-          borderColor0: upColor, 
+          color: "transparent",
+          color0: upColor,
+          borderColor: downColor,
+          borderColor0: upColor,
         },
       },
       {
@@ -368,9 +360,8 @@ function setKLineChart(res) {
       },
     ],
   };
-  chart.setOption(option);
+  chart?.setOption(option, { notMerge: true,lazyUpdate: true });
 
-  window.addEventListener("resize", () => chart.resize());
 }
 const stockInfo = ref<StockInfoParams>({} as StockInfoParams);
 const {
@@ -378,7 +369,7 @@ const {
   getNewsList,
   histroyLimitUp,
   getKlineData,
-  getRealTimeData,
+  getTrendData,
 } = useStockApi();
 function getData() {
   getByCode({ code }).then((res) => {
@@ -415,6 +406,13 @@ function formatNumber(value: number): string {
     return `${(value / 100000000).toFixed(2)}亿`;
   }
 }
+
+onBeforeUnmount(() => {
+  if (chart) {
+    chart.dispose();
+    chart = null;
+  }
+});
 </script>
 
 <template>
@@ -482,7 +480,7 @@ function formatNumber(value: number): string {
         :tab="item.label"
       ></a-tab-pane>
     </a-tabs>
-    <div ref="chartRef" class="bg-white chart w-full h-[400px] mb-2"></div>
+    <div ref="chartRef" class="bg-white chart w-[1200px] h-[400px] mb-2"></div>
 
     <div class="mt-2 bg-white">
       <div class="p-4">

@@ -59,8 +59,8 @@ export function useStockApi() {
     /**
      * 股票详情-分时线图
      */
-    getRealTimeData: (params: { code: string }) =>
-      $request.get<StockInfoParams>('/stock/getRealTimeData', params),
+    getTrendData: (params: { code: string }) =>
+      $request.get<StockInfoParams>('/stock/getTrendData', params),
 
     /**
      * 获取龙板通达
