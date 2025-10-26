@@ -54,8 +54,13 @@ export function useStockApi() {
     /**
      * 股票详情-k线图
      */
-    getKlineData: (params: { code: string }) =>
+    getKlineData: (params: { code: string,period_type:string }) =>
       $request.get<StockInfoParams>('/stock/getKlineData', params),
+    /**
+     * 股票详情-分时线图
+     */
+    getRealTimeData: (params: { code: string }) =>
+      $request.get<StockInfoParams>('/stock/getRealTimeData', params),
 
     /**
      * 获取龙板通达

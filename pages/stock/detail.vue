@@ -9,84 +9,215 @@ const { $echarts } = useNuxtApp();
 
 const route = useRoute();
 let code = route.params.code as string;
-console.log(code);
+const periodType = ref("86400");
+const periodTypeList = ref([
+  { label: "分时图", value: "min" },
+  { label: "日K", value: "86400" },
+  { label: "周K", value: "604800" },
+  { label: "月K", value: "2592000" },
+]);
+function changePeriodType(periodType: string) {
+  const _code = "603162";
+  getKlineDataFn(_code, periodType);
+}
 onMounted(() => {
   getData();
   getNewsListFn();
   getHistroyLimit();
-  getKlineData({ code: '000001' }).then((res) => { 
-    function generateKlineData(baseData, count = 1000) {
-      [ "prod_name", "update_time", "last_px", "px_change", "px_change_rate", "preclose_px", "open_px", "high_px", "low_px", "amplitude", "turnover_ratio", "turnover_volume", "date", "minute" ]
-  const [name, dateStr, close, change, pctChange, open, prevClose, high, low, , turnover, vol, date, ts] = baseData;
-
-  const result = [];
-  let prevClosePrice = close;
-
-  for (let i = 0; i < count; i++) {
-    const dateObj = new Date(new Date(dateStr).getTime() - i * 24 * 60 * 60 * 1000);
-    const dateText = dateObj.toISOString().split("T")[0]; // yyyy-mm-dd
-
-    // 模拟波动范围
-    const changePct = (Math.random() - 0.5) * 4; // ±2% 波动
-    const openPrice = +(prevClosePrice * (1 + (Math.random() - 0.5) * 0.01)).toFixed(2);
-    const closePrice = +(openPrice * (1 + changePct / 100)).toFixed(2);
-    const highPrice = +(Math.max(openPrice, closePrice) * (1 + Math.random() * 0.01)).toFixed(2);
-    const lowPrice = +(Math.min(openPrice, closePrice) * (1 - Math.random() * 0.01)).toFixed(2);
-
-    const changePrice = +(closePrice - prevClosePrice).toFixed(2);
-    const pct = +((changePrice / prevClosePrice) * 100).toFixed(2);
-
-    const volume = Math.floor(Math.random() * 2_000_000 + 500_000);
-    const turnoverRate = +(Math.random() * 1.5).toFixed(2);
-
-    result.unshift([
-      name,
-      `${dateText} 15:00:00`,
-      closePrice,
-      changePrice,
-      pct,
-      openPrice,
-      prevClosePrice,
-      highPrice,
-      lowPrice,
-      0,
-      turnoverRate,
-      volume,
-      dateText.replace(/-/g, ""),
-      `${dateText.replace(/-/g, "")}${String(900 + i).padStart(4, "0")}`,
-    ]);
-
-    prevClosePrice = closePrice;
-  }
-
-  return result;
-}
-
-// 示例
-const base = ["平安银行", "2025-10-20 23:22:52", 11.42, 0.02, 0.18, 11.4, 11.41, 11.45, 11.27, 0, 0.49, 952641, "20251020", "202510201728"];
-
-const data = generateKlineData(base, 1000);
-      setKLineChart(data);
-  });
-
+  const _code = "603162";
+  getKlineDataFn(_code, periodType.value);
 });
+
+function getKlineDataFn(_code: string, periodType: string) {
+  if (periodType == "min") {
+    getRealTimeData({ code: _code }).then((res) => {
+      const times = [
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+      ];
+
+      const prices = [
+        9.2, 10.5, 10.8, 10.7, 10.72, 10.73, 10.75, 10.78, 10.8, 10.82,
+      ];
+      const avgPrices = [
+        9.2, 10.1, 10.5, 10.6, 10.68, 10.7, 10.72, 10.74, 10.76, 10.78,
+      ];
+      const volumes = [500, 800, 1200, 1000, 900, 600, 400, 700, 500, 800];
+
+      const preClose = 10.2; // 昨收价（用于计算涨跌幅）
+
+      const option = {
+        backgroundColor: "#fff",
+        title: {
+          text: "分时图示例",
+          left: "center",
+          top: 5,
+        },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "cross" },
+          formatter: (params) => {
+            const price = params[0].data;
+            const change = (((price - preClose) / preClose) * 100).toFixed(2);
+            return `
+        时间：${params[0].axisValue}<br/>
+        现价：${price}<br/>
+        均价：${params[1].data}<br/>
+        涨跌幅：<span style="color:${
+          change >= 0 ? "#ec0000" : "#00da3c"
+        }">${change}%</span>
+      `;
+          },
+        },
+        axisPointer: {
+          link: [{ xAxisIndex: "all" }],
+        },
+        grid: [
+          {
+            left: 60,
+            right: 50,
+            height: "60%",
+          },
+          {
+            left: 60,
+            right: 50,
+            top: "72%",
+            height: "20%",
+          },
+        ],
+        xAxis: [
+          {
+            type: "category",
+            data: times,
+            axisLine: { lineStyle: { color: "#aaa" } },
+            axisLabel: { color: "#555" },
+            splitLine: { show: false },
+          },
+          {
+            type: "category",
+            gridIndex: 1,
+            data: times,
+            axisLine: { lineStyle: { color: "#aaa" } },
+            axisLabel: { color: "#555" },
+            splitLine: { show: false },
+          },
+        ],
+        yAxis: [
+          {
+            type: "value",
+            scale: true,
+            splitLine: { show: false },
+            axisLabel: { color: "#666" },
+            axisLine: { show: false },
+            min: preClose * 0.9,
+            max: preClose * 1.1,
+            axisPointer: { show: true },
+            // 背景分层（±10%、±5%、0%）
+            splitArea: {
+              show: true,
+              areaStyle: {
+                color: [
+                  "#e0f7ff", // +10%区域
+                  "#f0faff", // +5%
+                  "#ffffff", // 0%
+                  "#f0fff0", // -5%
+                  "#e0ffe0", // -10%
+                ],
+              },
+            },
+          },
+          {
+            type: "value",
+            gridIndex: 1,
+            axisLabel: { show: false },
+            splitLine: { show: false },
+          },
+          // 右侧涨跌百分比刻度
+          {
+            type: "value",
+            position: "right",
+            min: -0.1,
+            max: 0.1,
+            interval: 0.05,
+            axisLabel: {
+              formatter: (val) => (val * 100).toFixed(2) + "%",
+              color: (val) =>
+                val > 0 ? "#ec0000" : val < 0 ? "#00da3c" : "#409eff",
+            },
+            splitLine: { show: false },
+          },
+        ],
+        series: [
+          {
+            name: "现价",
+            type: "line",
+            data: prices,
+            smooth: true,
+            showSymbol: false,
+            lineStyle: { color: "#1E90FF", width: 1.5 },
+            areaStyle: { color: "rgba(30,144,255,0.1)" },
+          },
+          {
+            name: "均价",
+            type: "line",
+            data: avgPrices,
+            smooth: true,
+            showSymbol: false,
+            lineStyle: { color: "#DAA520", width: 1 },
+          },
+          {
+            name: "成交量",
+            type: "bar",
+            xAxisIndex: 1,
+            yAxisIndex: 1,
+            barWidth: "60%",
+            itemStyle: {
+              color: (params) =>
+                prices[params.dataIndex] >= preClose ? "#ec0000" : "#00da3c",
+            },
+            data: volumes,
+          },
+        ],
+      };
+      if (!chartRef.value) return;
+       const chart = $echarts.init(chartRef.value);
+       chart.setOption(option)
+    });
+  } else {
+    getKlineData({ code: _code, period_type: periodType }).then((res) => {
+      const _data = res.candle[_code].lines.map((item) => {
+        return [
+          formatTimestamp(item[8]),
+          item[0],
+          item[1],
+          item[2],
+          item[3],
+          item[4],
+          item[5],
+          item[6],
+          item[7],
+        ];
+      });
+      setKLineChart(_data);
+    });
+  }
+}
 function setKLineChart(res) {
   if (!chartRef.value) return;
   const chart = $echarts.init(chartRef.value);
-  const upColor = "#ec0000"; // 涨：红色
-  const downColor = "#00da3c"; // 跌：绿色
+  const upColor = "#00da3c"; // 绿色
+  const downColor = "#ec0000"; // 红色
 
   // 模拟的股票数据：[日期, 开盘价, 收盘价, 最低价, 最高价, 成交量]
-  const rawData = res.map(item=>{
-    return [
-      item.date,
-      item.open,
-      item.close,
-      item.low,
-      item.high,
-      item.volume,
-    ];
-  });
+  const rawData = res;
 
   function splitData(rawData) {
     const categoryData = [];
@@ -120,10 +251,6 @@ function setKLineChart(res) {
   const data = splitData(rawData);
 
   const option = {
-    title: {
-      text: "K线 + 成交量（红涨绿跌）",
-      left: 0,
-    },
     legend: {
       data: ["K线", "MA5", "MA10", "成交量"],
       bottom: 5,
@@ -193,15 +320,15 @@ function setKLineChart(res) {
         xAxisIndex: [0, 1],
         start: 0,
         end: 100,
-      }
+      },
     ],
     visualMap: {
       show: false,
       seriesIndex: 3, // 改为成交量 series 索引
       dimension: 2,
       pieces: [
-        { value: 1, color: upColor }, // 收盘高于开盘：红
-        { value: -1, color: downColor }, // 收盘低于开盘：绿
+        { value: 1, color: downColor }, 
+        { value: -1, color: upColor }, 
       ],
     },
     series: [
@@ -210,10 +337,10 @@ function setKLineChart(res) {
         type: "candlestick",
         data: data.values,
         itemStyle: {
-          color: downColor,         // 跌：绿色 实心
-          color0: 'transparent',    // 涨：红色 空心
-          borderColor: downColor,   // 跌：绿色边框
-          borderColor0: upColor     // 涨：红色边框
+          color: 'transparent', 
+          color0: upColor, 
+          borderColor: downColor, 
+          borderColor0: upColor, 
         },
       },
       {
@@ -221,6 +348,7 @@ function setKLineChart(res) {
         type: "line",
         data: calculateMA(5, data),
         smooth: true,
+        showSymbol: false,
         lineStyle: { opacity: 0.5 },
       },
       {
@@ -228,6 +356,7 @@ function setKLineChart(res) {
         type: "line",
         data: calculateMA(10, data),
         smooth: true,
+        showSymbol: false,
         lineStyle: { opacity: 0.5 },
       },
       {
@@ -244,7 +373,13 @@ function setKLineChart(res) {
   window.addEventListener("resize", () => chart.resize());
 }
 const stockInfo = ref<StockInfoParams>({} as StockInfoParams);
-const { getByCode, getNewsList, histroyLimitUp, getKlineData } = useStockApi();
+const {
+  getByCode,
+  getNewsList,
+  histroyLimitUp,
+  getKlineData,
+  getRealTimeData,
+} = useStockApi();
 function getData() {
   getByCode({ code }).then((res) => {
     stockInfo.value = res;
@@ -284,8 +419,7 @@ function formatNumber(value: number): string {
 
 <template>
   <div class="py-2">
-    <div ref="chartRef" class="bg-white chart w-full h-[400px] mb-2"></div>
-    <div class="flex flex-row bg-white" style="padding: 20px">
+    <div class="flex flex-row mb-2 bg-white" style="padding: 20px">
       <div style="width: 700px; display: flex; flex-direction: column">
         <div style="font-size: 150%; font-weight: bold">
           {{ stockInfo.name }}[{{ stockInfo.code }}]
@@ -341,6 +475,14 @@ function formatNumber(value: number): string {
         </div>
       </div>
     </div>
+    <a-tabs v-model:activeKey="periodType" @change="changePeriodType">
+      <a-tab-pane
+        v-for="item in periodTypeList"
+        :key="item.value"
+        :tab="item.label"
+      ></a-tab-pane>
+    </a-tabs>
+    <div ref="chartRef" class="bg-white chart w-full h-[400px] mb-2"></div>
 
     <div class="mt-2 bg-white">
       <div class="p-4">
