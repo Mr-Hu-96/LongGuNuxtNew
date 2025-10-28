@@ -392,7 +392,7 @@ watch(
     if (isYesterday(val)) {
       lbtdInterval = window.setInterval(() => {
         getLbtdFn();
-      }, 2000);
+      }, 5000);
     }
   }
 );
@@ -442,7 +442,7 @@ watch(
     if (isYesterday(val)) {
       hotInterval = window.setInterval(() => {
         getHotFn();
-      }, 2000);
+      }, 5000);
     }
   }
 );
