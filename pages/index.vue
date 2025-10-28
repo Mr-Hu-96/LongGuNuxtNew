@@ -84,21 +84,20 @@
               <div class="flex-1 py-4">
                 <div class="flex flex-wrap gap-3">
                   <a-tooltip v-for="(item, i) in group.list" :key="item.code">
-                    <template #title
-                      >
+                    <template #title>
                       <div v-if="i > 0 || userInfo?.vip_info?.level">
                         <p>
-                        {{
-                          formatTimestamp(item.limit_up_time, "HH:mm") +
-                          "【" +
-                          item.code +
-                          "】" +
-                          "【" +
-                          item.stock_name +
-                          "】"
-                        }}
-                      </p>
-                      <div>{{ item.stock_reason }}</div>
+                          {{
+                            formatTimestamp(item.limit_up_time, "HH:mm") +
+                            "【" +
+                            item.code +
+                            "】" +
+                            "【" +
+                            item.stock_name +
+                            "】"
+                          }}
+                        </p>
+                        <div>{{ item.stock_reason }}</div>
                       </div>
                       <div v-else>请先开通会员</div>
                     </template>
@@ -107,8 +106,13 @@
                       class="rounded px-3 py-2 min-w-[110px] text-m shadow-sm border border-[#E8ECF5] cursor-pointer"
                       @click="router.push('/stockDetail/' + item.code)"
                     >
-                      <div class="font-medium text-[#888888] h-[20px]">
-                        {{ item.m_days_n_boards }}
+                      <div class="flex justify-between h-[20px]">
+                        <span class="font-medium text-[#888888]">{{
+                          item.m_days_n_boards
+                        }}</span>
+                        <span v-if="item.price_change_rate" class="text-[#ec0000]"
+                          >{{ item.price_change_rate }}%</span
+                        >
                       </div>
                       <div class="flex justify-between">
                         <div class="text-[#222222]">{{ item.stock_name }}</div>
@@ -206,21 +210,20 @@
               <div class="flex-1 py-4">
                 <div class="flex flex-wrap gap-3">
                   <a-tooltip v-for="(item, i) in group.list" :key="item.code">
-                    <template #title
-                      >
+                    <template #title>
                       <div v-if="i > 0 || userInfo?.vip_info?.level">
                         <p>
-                        {{
-                          formatTimestamp(item.limit_up_time, "HH:mm") +
-                          "【" +
-                          item.code +
-                          "】" +
-                          "【" +
-                          item.stock_name +
-                          "】"
-                        }}
-                      </p>
-                      <div>{{ item.stock_reason }}</div>
+                          {{
+                            formatTimestamp(item.limit_up_time, "HH:mm") +
+                            "【" +
+                            item.code +
+                            "】" +
+                            "【" +
+                            item.stock_name +
+                            "】"
+                          }}
+                        </p>
+                        <div>{{ item.stock_reason }}</div>
                       </div>
                       <div v-else>请先开通会员</div>
                     </template>
@@ -229,8 +232,13 @@
                       class="rounded px-3 py-2 min-w-[110px] text-m shadow-sm border border-[#E8ECF5] cursor-pointer"
                       @click="router.push('/stockDetail/' + item.code)"
                     >
-                      <div class="font-medium text-[#888888] h-[20px]">
-                        {{ item.m_days_n_boards }}
+                       <div class="flex justify-between h-[20px]">
+                        <span class="font-medium text-[#888888]">{{
+                          item.m_days_n_boards
+                        }}</span>
+                        <span v-if="item.price_change_rate" class="text-[#ec0000]"
+                          >{{ item.price_change_rate }}%</span
+                        >
                       </div>
                       <div class="flex justify-between">
                         <div class="text-[#222222]">{{ item.stock_name }}</div>
@@ -312,10 +320,25 @@ const plainOptions = [
   { label: "创业板", value: 2 },
   { label: "ST", value: 3 },
 ];
-
+// 定义定时器变量
+let hotInterval: number | undefined;
+let lbtdInterval: number | undefined;
+function isYesterday(dateStr: string | null): boolean {
+  if (!dateStr) return false;
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const d = new Date(dateStr);
+  return d.toDateString() === yesterday.toDateString();
+}
 const isClient = ref(false);
 onMounted(() => {
   isClient.value = true;
+});
+onBeforeUnmount(() => {
+  // 页面切换或者组件卸载时清除定时器
+  if (hotInterval) clearInterval(hotInterval);
+  if (lbtdInterval) clearInterval(lbtdInterval);
 });
 const router = useRouter();
 const route = useRoute();
@@ -363,8 +386,14 @@ function setLeftChecked() {
 }
 watch(
   () => leftCurrentDate.value,
-  () => {
+  (val) => {
     getLbtdFn();
+    if (lbtdInterval) clearInterval(lbtdInterval); // 清除旧定时器
+    if (isYesterday(val)) {
+      lbtdInterval = window.setInterval(() => {
+        getLbtdFn();
+      }, 2000);
+    }
   }
 );
 
@@ -407,20 +436,29 @@ function setRightChecked() {
 }
 watch(
   () => rightCurrentDate.value,
-  () => {
+  (val) => {
     getHotFn();
+    if (hotInterval) clearInterval(hotInterval);
+    if (isYesterday(val)) {
+      hotInterval = window.setInterval(() => {
+        getHotFn();
+      }, 2000);
+    }
   }
 );
 const { getTdk } = useSystemApi();
-const { data: tdk } = await useAsyncData(() => getTdk({ module_type: '首页' }), { server: true })
+const { data: tdk } = await useAsyncData(
+  () => getTdk({ module_type: "首页" }),
+  { server: true }
+);
 
 useHead(() => ({
-  title: tdk.value?.title || '',
+  title: tdk.value?.title || "",
   meta: [
-    { name: 'description', content: tdk.value?.description || '' },
-    { name: 'keywords', content: tdk.value?.keyword || '' },
+    { name: "description", content: tdk.value?.description || "" },
+    { name: "keywords", content: tdk.value?.keyword || "" },
   ],
-}))
+}));
 </script>
 <style scoped>
 .page {
