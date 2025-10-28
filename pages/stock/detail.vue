@@ -25,18 +25,17 @@ onMounted(() => {
   getData();
   getNewsListFn();
   getHistroyLimit();
-    if (chartRef.value) {
+  if (chartRef.value) {
     chart = $echarts.init(chartRef.value);
     window.addEventListener("resize", () => chart?.resize());
   }
   getKlineDataFn(code, periodType.value);
 });
 
-
 function formatToTimeHM(timestamp) {
   const date = new Date(timestamp);
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 }
 
@@ -201,8 +200,8 @@ function getKlineDataFn(_code: string, periodType: string) {
           formatTimestamp(item[8]),
           item[0],
           item[1],
-          item[2],
           item[3],
+          item[2],
           item[4],
           item[5],
           item[6],
@@ -214,7 +213,6 @@ function getKlineDataFn(_code: string, periodType: string) {
   }
 }
 function setKLineChart(res) {
-  
   const upColor = "#00da3c"; // 绿色
   const downColor = "#ec0000"; // 红色
 
@@ -227,7 +225,7 @@ function setKLineChart(res) {
     const volumes = [];
     for (let i = 0; i < rawData.length; i++) {
       categoryData.push(rawData[i][0]);
-      values.push(rawData[i].slice(1, 5));
+      values.push(rawData[i].slice(1, 9));
       // 这里改为：收盘价 > 开盘价 为 涨（1），否则为 跌（-1）
       volumes.push([i, rawData[i][5], rawData[i][2] > rawData[i][1] ? 1 : -1]);
     }
@@ -251,13 +249,39 @@ function setKLineChart(res) {
   }
 
   const data = splitData(rawData);
-
+  console.log(data);
   const option = {
     tooltip: {
       trigger: "axis",
       axisPointer: {
         type: "cross",
       },
+      formatter: function (params) {
+      let result = params[0].name + "<br/>";
+      params.forEach((item) => {
+        
+        if (item.seriesType === "candlestick") {
+          
+          
+          const [open, close, low, high,volume,to,px_change,px_change_rate] = item.data;
+          result += `
+            <span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background:${item.color};"></span>
+            ${item.seriesName}<br/>
+            开盘价：${open}<br/>
+            收盘价：${close}<br/>
+            最高价：${high}<br/>
+            最低价：${low}<br/>
+            涨跌额：${px_change}<br/>
+            涨跌率：${px_change_rate}<br/>
+          `;
+        } else if (item.seriesType === "line") {
+          result += `${item.seriesName}：${item.data}<br/>`;
+        } else if (item.seriesType === "bar") {
+          result += `成交量：${item.data[1] || item.data}<br/>`;
+        }
+      });
+      return result;
+    },
     },
     axisPointer: {
       link: [{ xAxisIndex: "all" }],
@@ -275,7 +299,7 @@ function setKLineChart(res) {
         height: "20%",
       },
     ],
-    xAxis: [
+  xAxis: [
       {
         type: "category",
         data: data.categoryData,
@@ -297,7 +321,7 @@ function setKLineChart(res) {
         max: "dataMax",
       },
     ],
-    yAxis: [
+  yAxis: [
       {
         scale: true,
         splitArea: { show: true },
@@ -329,7 +353,7 @@ function setKLineChart(res) {
         { value: -1, color: upColor },
       ],
     },
-    series: [
+  series: [
       {
         name: "K线",
         type: "candlestick",
@@ -365,18 +389,12 @@ function setKLineChart(res) {
         data: data.volumes,
       },
     ],
-  };
-  chart?.setOption(option, { notMerge: true,lazyUpdate: true });
-
+};
+  chart?.setOption(option, { notMerge: true, lazyUpdate: true });
 }
 const stockInfo = ref<StockInfoParams>({} as StockInfoParams);
-const {
-  getByCode,
-  getNewsList,
-  histroyLimitUp,
-  getKlineData,
-  getTrendData,
-} = useStockApi();
+const { getByCode, getNewsList, histroyLimitUp, getKlineData, getTrendData } =
+  useStockApi();
 function getData() {
   getByCode({ code }).then((res) => {
     stockInfo.value = res;
