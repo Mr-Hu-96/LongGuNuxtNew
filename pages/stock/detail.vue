@@ -48,140 +48,140 @@ function getKlineDataFn(_code: string, periodType: string) {
   }
   if (periodType == "min") {
     const fetchTrend = () => {
-      getTrendData({ code: _code }).then((res) => {
-        const times: string[] = [];
-        const prices: number[] = [];
-        const avgPrices: number[] = [];
-        const volumes: number[] = [];
+  getTrendData({ code: _code }).then((res) => {
+    const times: string[] = [];
+    const prices: number[] = [];
+    const avgPrices: number[] = [];
+    const volumes: number[] = [];
+    const pxChangeRate: number[] = [];
 
-        const preClose = 10.2; // 昨收价（用于计算涨跌幅）
-        res.lines.forEach((item: any) => {
-          times.push(formatToTimeHM(item[0] * 1000));
-          prices.push(item[1]);
-          avgPrices.push(item[2]);
-          volumes.push(item[3]);
-        });
+    res.lines.forEach((item: any) => {
+      times.push(formatToTimeHM(item[0] * 1000));
+      prices.push(item[1]);
+      avgPrices.push(item[2]);
+      volumes.push(item[3]);
+      pxChangeRate.push(item[9]/100); // 直接使用涨跌幅（小数形式）
+    });
 
-        const option = {
-          backgroundColor: "#fff",
-          tooltip: {
-            trigger: "axis",
-            axisPointer: { type: "cross" },
-            formatter: (params) => {
-              const price = params[0].data;
-              const change = (((price - preClose) / preClose) * 100).toFixed(2);
-              return `
-                时间：${params[0].axisValue}<br/>
-                现价：${price}<br/>
-                均价：${params[1].data}<br/>
-                涨跌幅：<span style="color:${
-                  change >= 0 ? "#ec0000" : "#00da3c"
-                }">${change}%</span>
-              `;
+    const option = {
+      backgroundColor: "#fff",
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "cross" },
+        formatter: (params) => {
+          const index = params[0].dataIndex;
+          const price = prices[index];
+          const avg = avgPrices[index];
+          const rate = pxChangeRate[index];
+          const color = rate >= 0 ? "#ec0000" : "#00da3c";
+          return `
+            时间：${params[0].axisValue}<br/>
+            现价：${price}<br/>
+            均价：${avg}<br/>
+            涨跌幅：<span style="color:${color}">${(rate * 100).toFixed(2)}%</span>
+          `;
+        },
+      },
+      axisPointer: { link: [{ xAxisIndex: "all" }] },
+      grid: [
+        { left: 60, right: 50, height: "55%" },
+        { left: 60, right: 50, top: "80%", height: "16%" },
+      ],
+      xAxis: [
+        {
+          type: "category",
+          data: times,
+          axisLine: { lineStyle: { color: "#aaa" } },
+          axisLabel: { color: "#555" },
+          splitLine: { show: false },
+        },
+        {
+          type: "category",
+          gridIndex: 1,
+          data: times,
+          axisLine: { lineStyle: { color: "#aaa" } },
+          axisLabel: { color: "#555" },
+          splitLine: { show: false },
+        },
+      ],
+      yAxis: [
+        {
+          type: "value",
+          scale: true,
+          splitLine: { show: false },
+          axisLabel: { color: "#666" },
+          axisLine: { show: false },
+          splitArea: {
+            show: true,
+            areaStyle: {
+              color: [
+                "#e0f7ff",
+                "#f0faff",
+                "#ffffff",
+                "#f0fff0",
+                "#e0ffe0",
+              ],
             },
           },
-          axisPointer: { link: [{ xAxisIndex: "all" }] },
-          grid: [
-            { left: 60, right: 50, height: "55%" },
-            { left: 60, right: 50, top: "80%", height: "16%" },
-          ],
-          xAxis: [
-            {
-              type: "category",
-              data: times,
-              axisLine: { lineStyle: { color: "#aaa" } },
-              axisLabel: { color: "#555" },
-              splitLine: { show: false },
-            },
-            {
-              type: "category",
-              gridIndex: 1,
-              data: times,
-              axisLine: { lineStyle: { color: "#aaa" } },
-              axisLabel: { color: "#555" },
-              splitLine: { show: false },
-            },
-          ],
-          yAxis: [
-            {
-              type: "value",
-              scale: true,
-              splitLine: { show: false },
-              axisLabel: { color: "#666" },
-              axisLine: { show: false },
-              min: preClose * 0.9,
-              max: preClose * 1.1,
-              axisPointer: { show: true },
-              splitArea: {
-                show: true,
-                areaStyle: {
-                  color: [
-                    "#e0f7ff",
-                    "#f0faff",
-                    "#ffffff",
-                    "#f0fff0",
-                    "#e0ffe0",
-                  ],
-                },
-              },
-            },
-            {
-              type: "value",
-              gridIndex: 1,
-              axisLabel: { show: false },
-              splitLine: { show: false },
-            },
-            {
-              type: "value",
-              position: "right",
-              min: -0.1,
-              max: 0.1,
-              interval: 0.05,
-              axisLabel: {
-                formatter: (val) => (val * 100).toFixed(2) + "%",
-                color: (val) =>
-                  val > 0 ? "#ec0000" : val < 0 ? "#00da3c" : "#409eff",
-              },
-              splitLine: { show: false },
-            },
-          ],
-          series: [
-            {
-              name: "现价",
-              type: "line",
-              data: prices,
-              smooth: true,
-              showSymbol: false,
-              lineStyle: { color: "#1E90FF", width: 1.5 },
-              areaStyle: { color: "rgba(30,144,255,0.1)" },
-            },
-            {
-              name: "均价",
-              type: "line",
-              data: avgPrices,
-              smooth: true,
-              showSymbol: false,
-              lineStyle: { color: "#DAA520", width: 1 },
-            },
-            {
-              name: "成交量",
-              type: "bar",
-              xAxisIndex: 1,
-              yAxisIndex: 1,
-              barWidth: "60%",
-              itemStyle: {
-                color: (params) =>
-                  prices[params.dataIndex] >= preClose ? "#ec0000" : "#00da3c",
-              },
-              data: volumes,
-            },
-          ],
-        };
-
-        // ✅ 平滑更新数据（不闪烁）
-        chart?.setOption(option, { notMerge: false, lazyUpdate: true });
-      });
+        },
+        {
+          type: "value",
+          gridIndex: 1,
+          axisLabel: { show: false },
+          splitLine: { show: false },
+        },
+        {
+          type: "value",
+          position: "right",
+          min: -0.1, // -10%
+          max: 0.1,  // +10%
+          interval: 0.05, // 每 5% 一格
+          axisLabel: {
+            formatter: (val) => (val * 100).toFixed(0) + "%",
+            color: (val) =>
+              val > 0 ? "#ec0000" : val < 0 ? "#00da3c" : "#409eff",
+          },
+          splitLine: { show: false },
+        },
+      ],
+      series: [
+        {
+          name: "现价",
+          type: "line",
+          data: prices,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: "#1E90FF", width: 1.5 },
+          areaStyle: { color: "rgba(30,144,255,0.1)" },
+        },
+        {
+          name: "均价",
+          type: "line",
+          data: avgPrices,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { color: "#DAA520", width: 1 },
+        },
+        {
+          name: "成交量",
+          type: "bar",
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          barWidth: "60%",
+          itemStyle: {
+            color: (params) =>
+              pxChangeRate[params.dataIndex] >= 0 ? "#ec0000" : "#00da3c",
+          },
+          data: volumes,
+        },
+      ],
     };
+
+    // ✅ 平滑更新，不闪烁
+    chart?.setOption(option, { notMerge: false, lazyUpdate: true });
+  });
+};
+
 
     // 第一次执行
     fetchTrend();
