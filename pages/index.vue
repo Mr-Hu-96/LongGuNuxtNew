@@ -110,7 +110,7 @@
                         <span class="font-medium text-[#888888]">{{
                           item.m_days_n_boards
                         }}</span>
-                        <span v-if="item.price_change_rate" class="text-[#ec0000]"
+                        <span v-if="item.price_change_rate" :class="item.price_change_rate>0?'text-[#ec0000]':'text-[#0e9d00]'"
                           >{{ item.price_change_rate }}%</span
                         >
                       </div>
@@ -236,7 +236,7 @@
                         <span class="font-medium text-[#888888]">{{
                           item.m_days_n_boards
                         }}</span>
-                        <span v-if="item.price_change_rate" class="text-[#ec0000]"
+                        <span v-if="item.price_change_rate" :class="item.price_change_rate>0?'text-[#ec0000]':'text-[#0e9d00]'"
                           >{{ item.price_change_rate }}%</span
                         >
                       </div>
